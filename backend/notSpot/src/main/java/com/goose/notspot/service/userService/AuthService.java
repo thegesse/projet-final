@@ -1,11 +1,10 @@
-package com.goose.notspot.service;
+package com.goose.notspot.service.userService;
 
 import com.goose.notspot.model.requestDTO.CreateUserRequest;
 import com.goose.notspot.model.user.DTO.UserDTO;
 import com.goose.notspot.model.user.User;
 import com.goose.notspot.repository.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

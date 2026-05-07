@@ -1,5 +1,6 @@
-package com.goose.notspot.service;
+package com.goose.notspot.service.userService;
 
+import com.goose.notspot.model.playlists.Playlist;
 import com.goose.notspot.model.user.DTO.UserDTO;
 import com.goose.notspot.model.user.User;
 import com.goose.notspot.repository.UserRepository;
@@ -30,6 +31,13 @@ public class UserCreationService {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
+
+        //default playlist creation and assigning it to the current user
+        Playlist likedSongs = new Playlist();
+        likedSongs.setTitle("Liked Songs");
+        likedSongs.setOwner(user);
+
+        user.getPlaylists().add(likedSongs);
 
         User savedUser = userRepository.save(user);
 
