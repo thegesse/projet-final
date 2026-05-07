@@ -1,11 +1,11 @@
 package com.goose.notspot.model.playlists.DTO;
 
-import com.goose.notspot.model.songs.DTO.songDTO;
+import com.goose.notspot.model.songs.DTO.SongDTO;
 
 import java.util.List;
 
-public record playlistVisuals(
+public record PlaylistVisuals(
    Long id,
    String title,
-   List<songDTO> songs
+   List<SongDTO> songs
 ) {}

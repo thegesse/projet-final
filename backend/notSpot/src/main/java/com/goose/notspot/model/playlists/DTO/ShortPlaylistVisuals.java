@@ -1,6 +1,6 @@
 package com.goose.notspot.model.playlists.DTO;
 
-public record shortPlaylistVisuals(
+public record ShortPlaylistVisuals(
         Long id,
-        String name
+        String title
 ) {}

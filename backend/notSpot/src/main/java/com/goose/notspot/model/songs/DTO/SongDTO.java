@@ -1,8 +1,8 @@
 package com.goose.notspot.model.songs.DTO;
 
-public record songDTO(
+public record SongDTO(
         Long id,
         String title,
         String artist,
-        String audioPath
+        String streamUrl
 ) {}

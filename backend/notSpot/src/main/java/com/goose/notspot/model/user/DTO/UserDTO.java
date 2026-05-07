@@ -1,8 +1,7 @@
 package com.goose.notspot.model.user.DTO;
 
-public record userDTO(
+public record UserDTO(
         String username,
-        String email,
-        String password
+        String email
 ) {
 }
