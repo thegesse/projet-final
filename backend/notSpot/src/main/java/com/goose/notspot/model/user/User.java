@@ -30,3 +30,5 @@ public class User {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Playlist> playlists = new ArrayList<>();
 }
+
+//TODO add pfp function: a UserPic class, and link it to User class (optional for now)
