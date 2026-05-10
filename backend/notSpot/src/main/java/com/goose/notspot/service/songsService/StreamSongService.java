@@ -16,8 +16,9 @@ public class StreamSongService {
     }
 
     public StreamResource streamSong(Long songId) {
-        //orElse null bc Im too lazy to add optional to the songrepo
-        Song song = songRepository.findById(songId).orElse(null);
+        //nevermind forgot exceptions existed
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new RuntimeException("song not found"));
 
         Resource resource = storeSongService.load(song.getAudioPath());
         return new StreamResource(resource, song.getContentType(), song.getFileSize());

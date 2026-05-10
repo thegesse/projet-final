@@ -29,6 +29,7 @@ public class AddSongService {
         song.setArtist(request.artist());
         song.setAudioPath(audioPath);
         song.setContentType(file.getContentType());
+        song.setFileSize(file.getSize());
         Song savedSong = songRepository.save(song);
 
         return new SongDTO(savedSong.getId(), savedSong.getTitle(), savedSong.getArtist(),
