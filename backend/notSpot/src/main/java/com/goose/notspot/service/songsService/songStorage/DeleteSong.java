@@ -1,4 +1,4 @@
-package com.goose.notspot.service.songsService;
+package com.goose.notspot.service.songsService.songStorage;
 
 import com.goose.notspot.model.playlists.Playlist;
 import com.goose.notspot.model.songs.Song;

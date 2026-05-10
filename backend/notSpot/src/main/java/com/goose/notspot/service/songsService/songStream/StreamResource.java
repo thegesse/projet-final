@@ -1,4 +1,4 @@
-package com.goose.notspot.service.songsService;
+package com.goose.notspot.service.songsService.songStream;
 
 import org.springframework.core.io.Resource;
 

@@ -1,4 +1,4 @@
-package com.goose.notspot.service.songsService;
+package com.goose.notspot.service.songsService.songSearch;
 
 import com.goose.notspot.model.songs.DTO.SongDTO;
 import com.goose.notspot.model.songs.Song;

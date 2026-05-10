@@ -1,4 +1,4 @@
-package com.goose.notspot.service.songsService;
+package com.goose.notspot.service.songsService.songStorage;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;

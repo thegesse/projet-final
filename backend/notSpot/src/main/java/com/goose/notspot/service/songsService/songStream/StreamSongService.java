@@ -1,7 +1,8 @@
-package com.goose.notspot.service.songsService;
+package com.goose.notspot.service.songsService.songStream;
 
 import com.goose.notspot.model.songs.Song;
 import com.goose.notspot.repository.SongRepository;
+import com.goose.notspot.service.songsService.songStorage.StoreSongService;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.goose.notspot.service;
+package com.goose.notspot.service.playlistService;
 
 import com.goose.notspot.model.playlists.DTO.PlaylistVisuals;
 import com.goose.notspot.model.playlists.Playlist;
