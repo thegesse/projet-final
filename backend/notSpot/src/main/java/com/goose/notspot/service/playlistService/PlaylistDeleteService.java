@@ -19,8 +19,7 @@ public class PlaylistDeleteService {
 
         Playlist playlist = playlistRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Playlist not found"));
-        //TODO fix this on Monday: getOwner = User, username = STring, should compare owner username like GetPlaylist
-        if(!playlist.getOwner().equals(username)){
+        if(!playlist.getOwner().getUsername().equals(username)){
             throw new AccessDeniedException("You don't have permission to delete this playlist");
         }
 
