@@ -8,7 +8,6 @@ import com.goose.notspot.service.userService.settings.ChangeNameService;
 import com.goose.notspot.service.userService.settings.ChangePasswordService;
 import com.goose.notspot.service.userService.settings.DeleteAccService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,14 +32,14 @@ public class UserSettingsController {
     }
 
     @PatchMapping("/users/{userId}/password")
-    public ResponseEntity<UserDTO> changePassword(@PathVariable Long userId, @Valid @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<Void> changePassword(@PathVariable Long userId, @Valid @RequestBody ChangePasswordRequest request) {
 
         changePasswordService.changePassword(userId, request);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/users/{userId}")
-    public ResponseEntity<UserDTO> deleteAcc(@PathVariable Long userId, @Valid @RequestBody DeleteAccountRequest request) {
+    public ResponseEntity<Void> deleteAcc(@PathVariable Long userId, @Valid @RequestBody DeleteAccountRequest request) {
         deleteAccService.deleteAccount(userId, request);
         return ResponseEntity.noContent().build();
     }
