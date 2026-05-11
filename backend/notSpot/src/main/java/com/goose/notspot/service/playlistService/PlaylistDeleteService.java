@@ -23,6 +23,10 @@ public class PlaylistDeleteService {
             throw new AccessDeniedException("You don't have permission to delete this playlist");
         }
 
+        if(playlist.getTitle().equals("Liked Songs")) {
+            throw new IllegalStateException("Liked songs cannot be deleted");
+        }
+
         playlistRepository.deleteById(id);
     }
 }
