@@ -1,7 +1,6 @@
-package com.goose.notspot.model.requestDTO;
+package com.goose.notspot.model.requestDTO.song;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public record CreateSongRequest(
         @NotBlank

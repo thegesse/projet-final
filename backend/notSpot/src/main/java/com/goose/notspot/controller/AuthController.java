@@ -1,7 +1,7 @@
 package com.goose.notspot.controller;
 
-import com.goose.notspot.model.requestDTO.CreateUserRequest;
-import com.goose.notspot.model.requestDTO.LoginRequest;
+import com.goose.notspot.model.requestDTO.auth.CreateUserRequest;
+import com.goose.notspot.model.requestDTO.auth.LoginRequest;
 import com.goose.notspot.model.user.DTO.UserDTO;
 import com.goose.notspot.service.userService.AuthService;
 import jakarta.validation.Valid;

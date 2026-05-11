@@ -1,6 +1,6 @@
 package com.goose.notspot.service.userService.settings;
 
-import com.goose.notspot.model.requestDTO.DeleteAccountRequest;
+import com.goose.notspot.model.requestDTO.user.DeleteAccountRequest;
 import com.goose.notspot.model.user.User;
 import com.goose.notspot.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;

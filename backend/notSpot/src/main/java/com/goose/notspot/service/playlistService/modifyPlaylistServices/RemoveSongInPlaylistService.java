@@ -2,7 +2,7 @@ package com.goose.notspot.service.playlistService.modifyPlaylistServices;
 
 import com.goose.notspot.model.playlists.DTO.PlaylistVisuals;
 import com.goose.notspot.model.playlists.Playlist;
-import com.goose.notspot.model.requestDTO.RemoveSongRequest;
+import com.goose.notspot.model.requestDTO.playlist.RemoveSongRequest;
 import com.goose.notspot.model.songs.DTO.SongDTO;
 import com.goose.notspot.model.songs.Song;
 import com.goose.notspot.repository.PlaylistRepository;

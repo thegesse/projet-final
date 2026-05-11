@@ -2,7 +2,7 @@ package com.goose.notspot.service.playlistService.modifyPlaylistServices;
 
 import com.goose.notspot.model.playlists.DTO.ShortPlaylistVisuals;
 import com.goose.notspot.model.playlists.Playlist;
-import com.goose.notspot.model.requestDTO.RenamePlaylistRequest;
+import com.goose.notspot.model.requestDTO.playlist.RenamePlaylistRequest;
 import com.goose.notspot.repository.PlaylistRepository;
 import org.springframework.stereotype.Service;
 

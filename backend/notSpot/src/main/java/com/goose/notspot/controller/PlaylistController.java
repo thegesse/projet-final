@@ -2,10 +2,10 @@ package com.goose.notspot.controller;
 
 import com.goose.notspot.model.playlists.DTO.PlaylistVisuals;
 import com.goose.notspot.model.playlists.DTO.ShortPlaylistVisuals;
-import com.goose.notspot.model.requestDTO.AddSongRequest;
-import com.goose.notspot.model.requestDTO.CreatePlaylistRequest;
-import com.goose.notspot.model.requestDTO.RemoveSongRequest;
-import com.goose.notspot.model.requestDTO.RenamePlaylistRequest;
+import com.goose.notspot.model.requestDTO.playlist.AddSongRequest;
+import com.goose.notspot.model.requestDTO.playlist.CreatePlaylistRequest;
+import com.goose.notspot.model.requestDTO.playlist.RemoveSongRequest;
+import com.goose.notspot.model.requestDTO.playlist.RenamePlaylistRequest;
 import com.goose.notspot.service.playlistService.findPlaylist.GetAllPlaylists;
 import com.goose.notspot.service.playlistService.findPlaylist.GetPlaylist;
 import com.goose.notspot.service.playlistService.modifyPlaylistServices.ChangePlaylistNameService;

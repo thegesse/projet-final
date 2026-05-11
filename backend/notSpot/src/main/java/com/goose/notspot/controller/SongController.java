@@ -1,6 +1,6 @@
 package com.goose.notspot.controller;
 
-import com.goose.notspot.model.requestDTO.CreateSongRequest;
+import com.goose.notspot.model.requestDTO.song.CreateSongRequest;
 import com.goose.notspot.model.songs.DTO.SongDTO;
 import com.goose.notspot.service.songsService.songSearch.GetAllSongs;
 import com.goose.notspot.service.songsService.songSearch.GetRandomSong;

@@ -1,6 +1,6 @@
 package com.goose.notspot.service.userService;
 
-import com.goose.notspot.model.requestDTO.CreateUserRequest;
+import com.goose.notspot.model.requestDTO.auth.CreateUserRequest;
 import com.goose.notspot.model.user.DTO.UserDTO;
 import com.goose.notspot.model.user.User;
 import com.goose.notspot.repository.UserRepository;

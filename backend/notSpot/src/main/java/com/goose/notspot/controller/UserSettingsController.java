@@ -1,8 +1,8 @@
 package com.goose.notspot.controller;
 
-import com.goose.notspot.model.requestDTO.ChangePasswordRequest;
-import com.goose.notspot.model.requestDTO.ChangeUsernameRequest;
-import com.goose.notspot.model.requestDTO.DeleteAccountRequest;
+import com.goose.notspot.model.requestDTO.user.ChangePasswordRequest;
+import com.goose.notspot.model.requestDTO.user.ChangeUsernameRequest;
+import com.goose.notspot.model.requestDTO.user.DeleteAccountRequest;
 import com.goose.notspot.model.user.DTO.UserDTO;
 import com.goose.notspot.service.userService.settings.ChangeNameService;
 import com.goose.notspot.service.userService.settings.ChangePasswordService;

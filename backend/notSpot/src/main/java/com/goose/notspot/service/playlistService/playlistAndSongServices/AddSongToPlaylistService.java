@@ -2,7 +2,7 @@ package com.goose.notspot.service.playlistService.playlistAndSongServices;
 
 import com.goose.notspot.model.playlists.DTO.PlaylistVisuals;
 import com.goose.notspot.model.playlists.Playlist;
-import com.goose.notspot.model.requestDTO.AddSongRequest;
+import com.goose.notspot.model.requestDTO.playlist.AddSongRequest;
 import com.goose.notspot.model.songs.DTO.SongDTO;
 import com.goose.notspot.model.songs.Song;
 import com.goose.notspot.repository.PlaylistRepository;

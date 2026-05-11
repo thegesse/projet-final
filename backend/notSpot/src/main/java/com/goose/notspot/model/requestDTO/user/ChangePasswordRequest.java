@@ -1,4 +1,4 @@
-package com.goose.notspot.model.requestDTO;
+package com.goose.notspot.model.requestDTO.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

@@ -1,4 +1,4 @@
-package com.goose.notspot.model.requestDTO;
+package com.goose.notspot.model.requestDTO.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

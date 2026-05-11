@@ -1,4 +1,4 @@
-package com.goose.notspot.model.requestDTO;
+package com.goose.notspot.model.requestDTO.playlist;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
