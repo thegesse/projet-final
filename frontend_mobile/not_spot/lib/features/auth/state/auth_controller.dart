@@ -4,7 +4,7 @@ import '../models/requests/login_request.dart';
 import '../models/requests/register_request.dart';
 import '../data/auth_api.dart';
 
-class AuthController extends ChangeNotifier{
+class AuthController extends ChangeNotifier {
   final AuthApi _authService = AuthApi();
 
 //states
@@ -22,34 +22,38 @@ class AuthController extends ChangeNotifier{
     notifyListeners();
   }
 
-  void _clearError(){
+  void _clearError() {
     _errorMessage = null;
   }
 
-
-  Future<void> login(String username, String password) async {
+  Future<bool> login(String username, String password) async {
     _setLoading(true);
     _clearError();
 
     try {
       final request = LoginRequest(username: username, password: password);
       _currentUser = await _authService.login(request);
-    } catch(e) {
+      return true;
+    } catch (e) {
       _errorMessage = e.toString();
+      return false;
     } finally {
       _setLoading(false);
     }
   }
 
-  Future<void> register(String username, String email, String password) async {
+  Future<bool> register(String username, String email, String password) async {
     _setLoading(true);
     _clearError();
 
     try {
-      final request = RegisterRequest(username: username, email: email, password: password);
+      final request =
+          RegisterRequest(username: username, email: email, password: password);
       _currentUser = await _authService.register(request);
+      return true;
     } catch (e) {
       _errorMessage = e.toString();
+      return false;
     } finally {
       _setLoading(false);
     }
