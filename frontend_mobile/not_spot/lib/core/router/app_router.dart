@@ -5,6 +5,7 @@ import '../../features/auth/state/auth_controller.dart';
 //screen
 import '../../ui/screens/login_screen.dart';
 import '../../ui/screens/register_screen.dart';
+import '../../ui/screens/home_screen.dart';
 
 class AppRouter {
   final AuthController authController;
@@ -13,7 +14,7 @@ class AppRouter {
 
   late final GoRouter router = GoRouter(
 
-    initialLocation: 'login',
+    initialLocation: '/login',
 
     refreshListenable: authController,
 
@@ -36,6 +37,10 @@ class AppRouter {
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => const HomeScreen(),
+      )
     ],
   );
 }

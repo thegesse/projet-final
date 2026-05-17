@@ -16,6 +16,8 @@ class AuthController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _currentUser != null;
+  String? get username => _currentUser?.username;
+  String? get email => _currentUser?.email;
 
   void _setLoading(bool value) {
     _isLoading = value;
