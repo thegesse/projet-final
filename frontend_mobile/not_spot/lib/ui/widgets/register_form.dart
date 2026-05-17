@@ -16,6 +16,14 @@ class _RegisterFormState extends State<RegisterForm> {
   final _passwordController = TextEditingController();
 
   @override
+  void dispose() {
+    _userController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
 
@@ -38,7 +46,16 @@ class _RegisterFormState extends State<RegisterForm> {
           TextFormField(
             controller: _passwordController,
             obscureText: true,
-            decoration: const InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(labelText: 'Password', hintText: 'Must be at least 8 characters'),
+            validator: (v) {
+              if(v == null || v.isEmpty) {
+                return 'Password required';
+              }
+              if(v.length < 8){
+                return 'Password must be at least 8 characters long';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 24),
           if (auth.errorMessage != null)
