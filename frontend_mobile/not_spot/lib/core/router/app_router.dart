@@ -13,7 +13,7 @@ class AppRouter {
   AppRouter(this.authController);
 
   late final GoRouter router = GoRouter(
-    initialLocation: '/register',
+    initialLocation: '/login',
     refreshListenable: authController,
     redirect: (BuildContext context, GoRouterState state) {
       final bool loggedIn = authController.isAuthenticated;

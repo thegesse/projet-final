@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:not_spot/core/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 import '../../features/auth/state/auth_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -43,14 +45,12 @@ class _LoginFormState extends State<LoginForm> {
             validator: (v) => v!.isEmpty ? 'Required' : null,
           ),
           const SizedBox(height: 24),
-
           if (auth.errorMessage != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Text(auth.errorMessage!,
                   style: const TextStyle(color: Colors.red)),
             ),
-
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -63,10 +63,8 @@ class _LoginFormState extends State<LoginForm> {
                   : const Text("Login"),
             ),
           ),
-
-          // ADDED: Link to Register Page
           TextButton(
-            onPressed: () => Navigator.of(context).pushNamed('/register'),
+            onPressed: () => context.push('/register'),
             child: const Text("Don't have an account? Register"),
           ),
         ],
