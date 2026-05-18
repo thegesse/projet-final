@@ -9,25 +9,22 @@ import '../../ui/screens/home_screen.dart';
 
 class AppRouter {
   final AuthController authController;
-  
+
   AppRouter(this.authController);
 
   late final GoRouter router = GoRouter(
-
-    initialLocation: '/login',
-
+    initialLocation: '/register',
     refreshListenable: authController,
-
     redirect: (BuildContext context, GoRouterState state) {
       final bool loggedIn = authController.isAuthenticated;
-      final bool loggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
+      final bool loggingIn = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/register';
 
-      if(!loggedIn && !loggingIn) return '/login';
-      if(loggedIn && loggingIn) return '/home';
+      if (!loggedIn && !loggingIn) return '/login';
+      if (loggedIn && loggingIn) return '/home';
 
       return null;
     },
-
     routes: [
       GoRoute(
         path: '/login',
