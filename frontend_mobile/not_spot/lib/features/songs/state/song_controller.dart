@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../models/domain/song.dart';
 import '../models/requests/add_song_request.dart';
 import '../data/song_api.dart';
+import 'package:just_audio/just_audio.dart';
+import '../../../core/config/app_config.dart';
 
 class SongController extends ChangeNotifier {
   final SongApi _songService = SongApi();
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   List<Song> _songs = [];
   List<Song> _searchResults = [];
@@ -106,6 +109,7 @@ class SongController extends ChangeNotifier {
       _songs.removeWhere((song) => song.id == songId);
 
       if (_currentSong?.id == songId) {
+        await _audioPlayer.stop();
         _currentSong = null;
         _isPlaying = false;
       }
@@ -117,16 +121,37 @@ class SongController extends ChangeNotifier {
     }
   }
 
-  void selectSong(Song song) {
+  Future<void> selectSong(Song song) async {
     _currentSong = song;
     _isPlaying = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _audioPlayer.setUrl('${AppConfig.origin}${song.streamUrl}');
+      await _audioPlayer.play();
+    } catch(e) {
+      _isPlaying = false;
+      _errorMessage = "couldn't play song $e";
+      notifyListeners();
+    }
+  }
+
+  Future<void> togglePlayPause() async{
+    if(!hasActiveSong) return;
+    if(_audioPlayer.playing) {
+      await _audioPlayer.pause();
+      _isPlaying = false;
+    } else {
+      await _audioPlayer.play();
+      _isPlaying = true;
+    }
     notifyListeners();
   }
 
-  void togglePlayPause() {
-    if (hasActiveSong) {
-      _isPlaying = !_isPlaying;
-      notifyListeners();
-    }
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 }
