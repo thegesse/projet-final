@@ -56,7 +56,7 @@ class MiniPlayer extends StatelessWidget {
                 color: Colors.white,
                 size: 36,
               ),
-              onPressed: () => controller.togglePlayPause,
+              onPressed: () => controller.togglePlayPause(),
             ),
           ],
         ),
