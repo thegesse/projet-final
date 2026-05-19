@@ -41,7 +41,7 @@ class SongApi {
 
     final response = await dio.post(AppConfig.songsUri().toString(),
         data: formData,
-        options: Options(headers: {'Accept': 'Application/json'}));
+        options: Options(headers: {'Accept': 'application/json'}));
 
     return Song.fromDTO(SongDTO.fromJson(response.data));
   }
