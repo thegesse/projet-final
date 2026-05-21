@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/state/auth_controller.dart';
+import 'features/songs/state/song_controller.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProvider(create: (_) => SongController()),
       ],
       child: const NotSpot(),
     ),
