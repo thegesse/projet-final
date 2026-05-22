@@ -33,6 +33,8 @@ class AppConfig {
   static Uri songStreamUri(int songId) => uri('$songsPath/$songId/stream');
   static Uri searchSongsUri(String query) =>
       uri('$songsPath/search', {'query': query});
+  static Uri createPlaylistUri({required int userId}) =>
+      uri(playlistsPath, {'userId': userId});
   static Uri playlistsUri({required String username}) =>
       uri(playlistsPath, {'username': username});
   static Uri playlistUri({
