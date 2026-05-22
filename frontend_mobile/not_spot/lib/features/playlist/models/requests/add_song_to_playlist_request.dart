@@ -1,4 +1,7 @@
 class AddSongToPlaylistRequest {
-  final int id;
-  const AddSongToPlaylistRequest({required this.id});
+  final int songId;
+
+  const AddSongToPlaylistRequest({required this.songId});
+
+  Map<String, dynamic> toJson() => {'songId': songId};
 }

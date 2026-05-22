@@ -1,6 +1,6 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:provider/provider.dart';
+import 'package:not_spot/features/playlist/models/requests/remove_song_from_playlist_request.dart';
+import 'package:not_spot/features/playlist/models/requests/rename_playlist_request.dart';
+
 import '../../../features/auth/state/auth_controller.dart';
 
 import '../../../core/config/app_config.dart';
@@ -10,8 +10,6 @@ import '../models/dto/playlist_dto.dart';
 import '../models/dto/short_playlist_dto.dart';
 import '../models/requests/add_song_to_playlist_request.dart';
 import '../models/requests/create_playlist_request.dart';
-import '../models/requests/remove_song_from_playlist_request.dart';
-import '../models/requests/rename_playlist_request.dart';
 
 class PlaylistApi {
   final AuthController authController;
@@ -56,5 +54,59 @@ class PlaylistApi {
     return Playlist.fromShortDTO(dto);
   }
 
-  // TODO add: add song to playlist, remove song from playlist, and rename playlist
+  Future<Playlist> addSongToPlaylist(int playlistId, AddSongToPlaylistRequest request,) async {
+    final user = authController.currentUser;
+    if (user == null) throw 'Not authenticated';
+
+    final response = await ApiClient.post(
+      AppConfig.playlistSongUri(
+        playlistId: playlistId,
+        username: user.username,
+      ),
+      request.toJson(),
+    );
+
+    final dto = PlaylistDTO.fromJson(response as Map<String, dynamic>);
+    return Playlist.fromDTO(dto);
+  }
+
+  Future<Playlist> removeSongFromPlaylist(int playlistId, RemoveSongFromPlaylistRequest request) async {
+    final user = authController.currentUser;
+    if(user == null) throw 'Not authenticated';
+
+    final response = await ApiClient.delete(
+      AppConfig.playlistSongUri(
+        playlistId: playlistId,
+        username: user.username,
+      ),
+      body: request.toJson(),
+    );
+
+    final dto = PlaylistDTO.fromJson(response as Map<String, dynamic>);
+    return Playlist.fromDTO(dto);
+  }
+
+  Future<Playlist> renamePlaylist(int playlistId, RenamePlaylistRequest request) async {
+    final user = authController.currentUser;
+    if(user == null) throw 'Not authenticated';
+
+    final response = await ApiClient.patch(
+      AppConfig.playlistUri(
+        playlistId: playlistId,
+        username: user.username,
+      ),
+      request.toJson(),
+    );
+
+    final dto = ShortPlaylistDTO.fromJson(response as Map<String, dynamic>);
+    return Playlist.fromShortDTO(dto);
+  }
+  
+
+  Future<void> deletePlaylist(int playlistId) async {
+    final user = authController.currentUser;
+    if(user == null) throw 'Not authenticated';
+
+    await ApiClient.delete(AppConfig.playlistUri(playlistId: playlistId, username: user.username));
+  }
 }

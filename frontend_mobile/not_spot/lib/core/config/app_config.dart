@@ -42,4 +42,10 @@ class AppConfig {
     required String username,
   }) =>
       uri('$playlistsPath/$playlistId', {'username': username});
+  static Uri playlistSongUri({
+    required int playlistId,
+    required String username,
+  }) =>
+      uri('$playlistsPath/$playlistId/song', {'username': username});
+  
 }

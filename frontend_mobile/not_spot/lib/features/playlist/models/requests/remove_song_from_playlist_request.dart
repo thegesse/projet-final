@@ -1,5 +1,7 @@
 class RemoveSongFromPlaylistRequest {
-  final int id;
+  final int songId;
 
-  const RemoveSongFromPlaylistRequest({required this.id});
+  const RemoveSongFromPlaylistRequest({required this.songId});
+
+  Map<String, dynamic> toJson() => {'songId': songId};
 }

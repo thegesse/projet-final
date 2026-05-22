@@ -42,9 +42,10 @@ class ApiClient {
     }
   }
 
+
   static Future<dynamic> get(Uri uri) => _request('GET', uri);
   static Future<dynamic> post(Uri uri, Object body) => _request('POST', uri, body: body);
   static Future<dynamic> patch(Uri uri, Object body) => _request('PATCH', uri, body: body);
-  static Future<dynamic> delete(Uri uri) => _request('DELETE', uri);
-
+  static Future<dynamic> delete(Uri uri, {Object? body}) =>
+    _request('DELETE', uri, body: body);
 }
