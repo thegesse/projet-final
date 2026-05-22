@@ -18,11 +18,16 @@ class SongController extends ChangeNotifier {
   bool _isSearching = false;
   bool _isUploading = false;
   bool _isDeleting = false;
-  bool _isPlaying = false;
 
   String? _errorMessage;
   String? _uploadError;
   String? _deleteError;
+
+  SongController() {
+    _audioPlayer.playerStateStream.listen((playerState) {
+      notifyListeners();
+    });
+  }
 
   List<Song> get songs => _songs;
   List<Song> get searchResults => _searchResults;
@@ -32,7 +37,7 @@ class SongController extends ChangeNotifier {
   bool get isSearching => _isSearching;
   bool get isUploading => _isUploading;
   bool get isDeleting => _isDeleting;
-  bool get isPlaying => _isPlaying;
+  bool get isPlaying => _audioPlayer.playing;
 
   String? get errorMessage => _errorMessage;
   String? get uploadError => _uploadError;
@@ -111,7 +116,6 @@ class SongController extends ChangeNotifier {
       if (_currentSong?.id == songId) {
         await _audioPlayer.stop();
         _currentSong = null;
-        _isPlaying = false;
       }
     } catch (e) {
       _deleteError = "Failed to delete this song: $e";
@@ -123,30 +127,26 @@ class SongController extends ChangeNotifier {
 
   Future<void> selectSong(Song song) async {
     _currentSong = song;
-    _isPlaying = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       await _audioPlayer.setUrl('${AppConfig.origin}${song.streamUrl}');
       await _audioPlayer.play();
-    } catch(e) {
-      _isPlaying = false;
+    } catch (e) {
       _errorMessage = "couldn't play song $e";
       notifyListeners();
     }
   }
 
-  Future<void> togglePlayPause() async{
-    if(!hasActiveSong) return;
-    if(_audioPlayer.playing) {
+  Future<void> togglePlayPause() async {
+    if (!hasActiveSong) return;
+
+    if (_audioPlayer.playing) {
       await _audioPlayer.pause();
-      _isPlaying = false;
     } else {
       await _audioPlayer.play();
-      _isPlaying = true;
     }
-    notifyListeners();
   }
 
   @override

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:not_spot/core/router/app_router.dart';
 import '../../features/auth/state/auth_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
@@ -46,12 +48,14 @@ class _RegisterFormState extends State<RegisterForm> {
           TextFormField(
             controller: _passwordController,
             obscureText: true,
-            decoration: const InputDecoration(labelText: 'Password', hintText: 'Must be at least 8 characters'),
+            decoration: const InputDecoration(
+                labelText: 'Password',
+                hintText: 'Must be at least 8 characters'),
             validator: (v) {
-              if(v == null || v.isEmpty) {
+              if (v == null || v.isEmpty) {
                 return 'Password required';
               }
-              if(v.length < 8){
+              if (v.length < 8) {
                 return 'Password must be at least 8 characters long';
               }
               return null;
@@ -75,6 +79,10 @@ class _RegisterFormState extends State<RegisterForm> {
                       child: CircularProgressIndicator(strokeWidth: 2))
                   : const Text("Create Account"),
             ),
+          ),
+          TextButton(
+            onPressed: () => context.push('/login'),
+            child: const Text("Already have an account? Login"),
           ),
         ],
       ),

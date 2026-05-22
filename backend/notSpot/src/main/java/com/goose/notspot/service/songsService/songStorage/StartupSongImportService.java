@@ -5,6 +5,8 @@ import com.goose.notspot.repository.SongRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,12 +14,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 //format of files artist - title.mp3
 @Service
 //application running so that it starts auto
 public class StartupSongImportService implements ApplicationRunner {
-    private static final Path UPLOAD_DIR = Paths.get("uploads/songs");
+    private static final Logger logger = LoggerFactory.getLogger(StartupSongImportService.class);
+    private static final Path UPLOAD_DIR = resolveUploadDir();
+    private static final Pattern ARTIST_TITLE_SEPARATOR = Pattern.compile("\\s+[-\u2013\u2014]\\s+");
 
     private final SongRepository songRepository;
 
@@ -25,8 +31,25 @@ public class StartupSongImportService implements ApplicationRunner {
         this.songRepository = songRepository;
     }
 
+    private static Path resolveUploadDir() {
+        Path cwd = Paths.get(System.getProperty("user.dir", "."));
+        Path primary = cwd.resolve("uploads/songs");
+        if (Files.isDirectory(primary)) {
+            return primary;
+        }
+
+        // Common dev case: running Spring from repo root where "notSpot/" contains the app.
+        Path fallback = cwd.resolve("notSpot/uploads/songs");
+        if (Files.isDirectory(fallback)) {
+            return fallback;
+        }
+
+        return primary;
+    }
+
     @Override
     public void run(ApplicationArguments args) {
+        logger.info("Startup song import scan dir: {}", UPLOAD_DIR.toAbsolutePath());
         if (!Files.isDirectory(UPLOAD_DIR)) {
             return;
         }
@@ -96,10 +119,13 @@ public class StartupSongImportService implements ApplicationRunner {
 
     private SongMetadata metadataFromFileName(String fileName) {
         String name = stripExtension(fileName).trim();
-        String[] parts = name.split("\\s+-\\s+", 2);
-
-        if (parts.length == 2 && !parts[0].isBlank() && !parts[1].isBlank()) {
-            return new SongMetadata(parts[1].trim(), parts[0].trim());
+        Matcher matcher = ARTIST_TITLE_SEPARATOR.matcher(name);
+        if (matcher.find()) {
+            String artist = name.substring(0, matcher.start()).trim();
+            String title = name.substring(matcher.end()).trim();
+            if (!artist.isBlank() && !title.isBlank()) {
+                return new SongMetadata(title, artist);
+            }
         }
 
         return new SongMetadata(name.isBlank() ? fileName : name, "Unknown Artist");

@@ -13,7 +13,22 @@ import java.nio.file.Files;
 
 @Service
 public class StoreSongService {
-    private final Path uploadDir = Paths.get("uploads/songs");
+    private final Path uploadDir = resolveUploadDir();
+
+    private static Path resolveUploadDir() {
+        Path cwd = Paths.get(System.getProperty("user.dir", "."));
+        Path primary = cwd.resolve("uploads/songs");
+        if (Files.isDirectory(primary)) {
+            return primary;
+        }
+
+        Path fallback = cwd.resolve("notSpot/uploads/songs");
+        if (Files.isDirectory(fallback)) {
+            return fallback;
+        }
+
+        return primary;
+    }
 
 
     private String getExtension(String fileName) {
