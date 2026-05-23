@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_spot/features/playlist/state/playlist_controller.dart';
 import 'package:provider/provider.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/state/auth_controller.dart';
@@ -10,6 +11,10 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController()),
         ChangeNotifierProvider(create: (_) => SongController()),
+        ChangeNotifierProxyProvider<AuthController, PlaylistController>(
+          create: (context) => PlaylistController(context.read<AuthController>()),
+          update: (context, auth, previous) => previous ?? PlaylistController(auth),
+        ),
       ],
       child: const NotSpot(),
     ),
