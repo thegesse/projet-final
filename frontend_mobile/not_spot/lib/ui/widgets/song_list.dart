@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../features/songs/models/domain/song.dart';
+import 'add_to_playlist_sheet.dart';
 
 class SongList extends StatelessWidget {
   final Song song;
   final bool isCurrent;
   final VoidCallback onTap;
 
-  const SongList(
-      {super.key,
-      required this.song,
-      required this.isCurrent,
-      required this.onTap});
+  const SongList({
+    super.key,
+    required this.song,
+    required this.isCurrent,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,18 +22,21 @@ class SongList extends StatelessWidget {
       elevation: isCurrent ? 2 : 0,
       margin: const EdgeInsets.only(bottom: 8),
       color: isCurrent
-          ? Theme.of(context).primaryColor.withOpacity(0.85)
+          ? Theme.of(context).colorScheme.primary.withOpacity(0.85)
           : Colors.transparent,
       child: ListTile(
         onTap: onTap,
         leading: Icon(
           isCurrent ? Icons.volume_up : Icons.music_note,
-          color: isCurrent ? Theme.of(context).primaryColor : Colors.grey,
+          color: isCurrent
+              ? Theme.of(context).colorScheme.primary
+              : Colors.grey,
         ),
         title: Text(
           song.title,
           style: TextStyle(
-              fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal),
+            fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+          ),
         ),
         subtitle: Text(song.artist),
         trailing: SizedBox(
@@ -40,16 +45,31 @@ class SongList extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               if (isDesktop) ...[
-                //place holder until I make runtimes
-                const Text("3:45",
-                    style: TextStyle(color: Colors.grey, fontSize: 13)),
+                const Text(
+                  "3:45",
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
                 const SizedBox(width: 20),
               ],
-              const Icon(Icons.more_vert),
+              IconButton(
+                icon: const Icon(Icons.more_vert),
+                onPressed: () => _showSongOptions(context),
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showSongOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => AddToPlaylistSheet(song: song),
     );
   }
 }

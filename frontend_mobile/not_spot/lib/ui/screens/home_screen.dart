@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/playlist/state/playlist_controller.dart';
 import '../../features/songs/state/song_controller.dart';
 import '../widgets/homescreen_header.dart';
 import '../widgets/mini_player.dart';
+import '../widgets/playlist_section.dart';
 import '../widgets/song_list.dart';
 //bc searchbar is already a thing
 import '../widgets/searchbar.dart' as custom_search;
 
-
-class HomeScreen extends StatefulWidget{
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
@@ -17,12 +18,26 @@ class HomeScreen extends StatefulWidget{
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SongController>().fetchSongs();
+      context.read<PlaylistController>().fetchPlaylists();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final songController = context.watch<SongController>();
+    final playlistController = context.watch<PlaylistController>();
 
-    final songsToShow = songController.searchResults.isNotEmpty ? songController.searchResults : songController.songs;
+    final songsToShow = playlistController.hasCurrentPlaylist
+        ? playlistController.currentPlaylist!.songs
+        : songController.searchResults.isNotEmpty
+            ? songController.searchResults
+            : songController.songs;
 
     return Scaffold(
       appBar: AppBar(
@@ -30,7 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {context.read<AuthController>().logout();},
+            onPressed: () {
+              context.read<AuthController>().logout();
+            },
           ),
         ],
       ),
@@ -41,10 +58,13 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const HomescreenHeader(),
               const custom_search.SearchBar(),
+              const PlaylistRail(),
               const SizedBox(height: 16),
 
-              if(songController.isLoading)
-                const Expanded(child: Center(child: CircularProgressIndicator()),)
+              if (songController.isLoading)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                )
               else if (songController.errorMessage != null)
                 Expanded(
                   child: Center(
@@ -65,7 +85,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) {
                       final song = songsToShow[index];
 
-                      return SongList(song: song, isCurrent: songController.currentSong?.id == song.id, onTap: () {songController.selectSong(song);},);
+                      return SongList(
+                        song: song,
+                        isCurrent: songController.currentSong?.id == song.id,
+                        onTap: () {
+                          songController.selectSong(song);
+                        },
+                      );
                     },
                   ),
                 ),

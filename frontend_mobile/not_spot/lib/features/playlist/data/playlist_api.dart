@@ -54,7 +54,10 @@ class PlaylistApi {
     return Playlist.fromShortDTO(dto);
   }
 
-  Future<Playlist> addSongToPlaylist(int playlistId, AddSongToPlaylistRequest request,) async {
+  Future<Playlist> addSongToPlaylist(
+    int playlistId,
+    AddSongToPlaylistRequest request,
+  ) async {
     final user = authController.currentUser;
     if (user == null) throw 'Not authenticated';
 
@@ -70,9 +73,12 @@ class PlaylistApi {
     return Playlist.fromDTO(dto);
   }
 
-  Future<Playlist> removeSongFromPlaylist(int playlistId, RemoveSongFromPlaylistRequest request) async {
+  Future<Playlist> removeSongFromPlaylist(
+    int playlistId,
+    RemoveSongFromPlaylistRequest request,
+  ) async {
     final user = authController.currentUser;
-    if(user == null) throw 'Not authenticated';
+    if (user == null) throw 'Not authenticated';
 
     final response = await ApiClient.delete(
       AppConfig.playlistSongUri(
@@ -86,9 +92,12 @@ class PlaylistApi {
     return Playlist.fromDTO(dto);
   }
 
-  Future<Playlist> renamePlaylist(int playlistId, RenamePlaylistRequest request) async {
+  Future<Playlist> renamePlaylist(
+    int playlistId,
+    RenamePlaylistRequest request,
+  ) async {
     final user = authController.currentUser;
-    if(user == null) throw 'Not authenticated';
+    if (user == null) throw 'Not authenticated';
 
     final response = await ApiClient.patch(
       AppConfig.playlistUri(
@@ -101,12 +110,16 @@ class PlaylistApi {
     final dto = ShortPlaylistDTO.fromJson(response as Map<String, dynamic>);
     return Playlist.fromShortDTO(dto);
   }
-  
 
   Future<void> deletePlaylist(int playlistId) async {
     final user = authController.currentUser;
-    if(user == null) throw 'Not authenticated';
+    if (user == null) throw 'Not authenticated';
 
-    await ApiClient.delete(AppConfig.playlistUri(playlistId: playlistId, username: user.username));
+    await ApiClient.delete(
+      AppConfig.playlistUri(
+        playlistId: playlistId,
+        username: user.username,
+      ),
+    );
   }
 }
