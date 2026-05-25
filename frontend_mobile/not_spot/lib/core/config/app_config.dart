@@ -51,9 +51,9 @@ class AppConfig {
   static Uri changeUsernameUri({required int userId}) =>
     uri('$settingsPath/users/$userId/username');
 
-static Uri changePasswordUri({required int userId}) =>
+  static Uri changePasswordUri({required int userId}) =>
     uri('$settingsPath/users/$userId/password');
 
-static Uri deleteAccountUri({required int userId}) =>
+  static Uri deleteAccountUri({required int userId}) =>
     uri('$settingsPath/users/$userId');
 }
