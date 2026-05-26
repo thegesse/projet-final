@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../features/playlist/state/playlist_controller.dart';
-import '../../features/songs/models/domain/song.dart';
+import '../../../features/playlist/state/playlist_controller.dart';
+import '../../../features/songs/models/domain/song.dart';
 
 class AddToPlaylistSheet extends StatelessWidget {
   final Song song;
@@ -33,7 +33,8 @@ class AddToPlaylistSheet extends StatelessWidget {
                           width: 48,
                           height: 48,
                           color: Colors.grey.shade800,
-                          child: const Icon(Icons.music_note, color: Colors.white54),
+                          child: const Icon(Icons.music_note,
+                              color: Colors.white54),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -48,7 +49,10 @@ class AddToPlaylistSheet extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               song.title,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: Colors.grey,
                                   ),
                               maxLines: 1,
@@ -120,12 +124,14 @@ class AddToPlaylistSheet extends StatelessWidget {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.add),
                           onTap: isAdding
                               ? null
-                              : () => _addToPlaylist(context, controller, playlist.id),
+                              : () => _addToPlaylist(
+                                  context, controller, playlist.id),
                         );
                       },
                     ),

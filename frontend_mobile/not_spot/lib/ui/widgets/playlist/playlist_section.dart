@@ -59,7 +59,15 @@ class PlaylistRail extends StatelessWidget {
             child: _PlaylistChip(
               playlist: playlist,
               isSelected: isSelected,
-              onTap: () => controller.selectPlaylist(playlist.id),
+              onTap: () {
+                final isSelected =
+                    controller.currentPlaylist?.id == playlist.id;
+                if (isSelected) {
+                  controller.clearCurrentPlaylist();
+                } else {
+                  controller.selectPlaylist(playlist.id);
+                }
+              },
             ),
           );
         },
@@ -94,13 +102,22 @@ class PlaylistRail extends StatelessWidget {
               itemCount: playlists.length,
               itemBuilder: (context, index) {
                 final playlist = playlists[index];
-                final isSelected = controller.currentPlaylist?.id == playlist.id;
+                final isSelected =
+                    controller.currentPlaylist?.id == playlist.id;
 
                 return ListTile(
                   leading: const Icon(Icons.playlist_play),
                   title: Text(playlist.title),
                   selected: isSelected,
-                  onTap: () => controller.selectPlaylist(playlist.id),
+                  onTap: () {
+                    final isSelected =
+                        controller.currentPlaylist?.id == playlist.id;
+                    if (isSelected) {
+                      controller.clearCurrentPlaylist();
+                    } else {
+                      controller.selectPlaylist(playlist.id);
+                    }
+                  },
                 );
               },
             ),

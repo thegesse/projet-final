@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../features/songs/state/song_controller.dart';
+import '../../../features/songs/state/song_controller.dart';
+import '../../../features/playlist/state/playlist_controller.dart';
 
 class SearchBar extends StatefulWidget {
   const SearchBar({super.key});
@@ -33,6 +34,9 @@ class _SearchBarState extends State<SearchBar> {
                   controller: _searchController,
                   cursorColor: Colors.grey,
                   onChanged: (value) {
+                    if (value.trim().isNotEmpty) {
+                      context.read<PlaylistController>().clearCurrentPlaylist();
+                    }
                     context.read<SongController>().searchSongs(value);
                   },
                   decoration: InputDecoration(

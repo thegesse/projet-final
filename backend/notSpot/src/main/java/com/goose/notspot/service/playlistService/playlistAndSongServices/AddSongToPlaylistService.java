@@ -42,10 +42,15 @@ public class AddSongToPlaylistService {
             throw new RuntimeException("you dont own this playlist");
         }
 
-        Song song = songRepository.findById(request.songId())
+        Long songId = request.songId();
+        Song song = songRepository.findById(songId)
                 .orElseThrow(() -> new RuntimeException("song not found"));
 
-        if(!playlist.getSongs().contains(song)) {
+        boolean alreadyInPlaylist = playlist.getSongs()
+                .stream()
+                .anyMatch(existing -> existing.getId() != null && existing.getId().equals(songId));
+
+        if(!alreadyInPlaylist) {
             playlist.getSongs().add(song);
         }
         Playlist savedPlaylist = playlistRepository.save(playlist);

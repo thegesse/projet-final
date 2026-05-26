@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:not_spot/core/router/app_router.dart';
-import '../../features/auth/state/auth_controller.dart';
+import '../../../features/auth/state/auth_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 

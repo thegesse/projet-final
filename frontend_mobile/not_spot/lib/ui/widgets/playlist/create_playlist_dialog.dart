@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../features/playlist/state/playlist_controller.dart';
+import '../../../features/playlist/state/playlist_controller.dart';
 
 class CreatePlaylistDialog extends StatefulWidget {
   const CreatePlaylistDialog({super.key});
@@ -55,8 +55,9 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
               child: const Text('Cancel'),
             ),
             FilledButton(
-              onPressed:
-                  isCreating ? null : () => _submit(context, playlistController),
+              onPressed: isCreating
+                  ? null
+                  : () => _submit(context, playlistController),
               child: isCreating
                   ? const SizedBox(
                       width: 16,

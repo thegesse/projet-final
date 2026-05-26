@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../features/songs/state/song_controller.dart';
+import '../../../features/songs/state/song_controller.dart';
 
 class MiniPlayer extends StatelessWidget {
   const MiniPlayer({super.key});

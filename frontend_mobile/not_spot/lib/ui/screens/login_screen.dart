@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/login_form.dart';
+import '../widgets/auth/login_form.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});

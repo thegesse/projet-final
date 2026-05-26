@@ -3,12 +3,12 @@ import 'package:provider/provider.dart';
 import '../../features/auth/state/auth_controller.dart';
 import '../../features/playlist/state/playlist_controller.dart';
 import '../../features/songs/state/song_controller.dart';
-import '../widgets/homescreen_header.dart';
-import '../widgets/mini_player.dart';
-import '../widgets/playlist_section.dart';
-import '../widgets/song_list.dart';
+import '../widgets/general/homescreen_header.dart';
+import '../widgets/song/mini_player.dart';
+import '../widgets/playlist/playlist_section.dart';
+import '../widgets/song/song_list.dart';
 //bc searchbar is already a thing
-import '../widgets/searchbar.dart' as custom_search;
+import '../widgets/general/searchbar.dart' as custom_search;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
               const custom_search.SearchBar(),
               const PlaylistRail(),
               const SizedBox(height: 16),
-
               if (songController.isLoading)
                 const Expanded(
                   child: Center(child: CircularProgressIndicator()),

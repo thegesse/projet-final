@@ -42,10 +42,12 @@ public class RemoveSongInPlaylistService {
             throw new RuntimeException("you dont own this playlist");
         }
 
-        Song song = songRepository.findById(request.songId())
+        Long songId = request.songId();
+        // Still validate the song exists (keeps error messages sensible).
+        songRepository.findById(songId)
                 .orElseThrow(() -> new RuntimeException("song not found"));
 
-        playlist.getSongs().remove(song);
+        playlist.getSongs().removeIf(existing -> existing.getId() != null && existing.getId().equals(songId));
 
         Playlist savedPlaylist = playlistRepository.save(playlist);
         return mapToDTO(savedPlaylist);

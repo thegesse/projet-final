@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../features/songs/models/domain/song.dart';
-import 'add_to_playlist_sheet.dart';
+import '../../../features/songs/models/domain/song.dart';
+import '../playlist/add_to_playlist_sheet.dart';
 
 class SongList extends StatelessWidget {
   final Song song;
@@ -28,9 +28,8 @@ class SongList extends StatelessWidget {
         onTap: onTap,
         leading: Icon(
           isCurrent ? Icons.volume_up : Icons.music_note,
-          color: isCurrent
-              ? Theme.of(context).colorScheme.primary
-              : Colors.grey,
+          color:
+              isCurrent ? Theme.of(context).colorScheme.primary : Colors.grey,
         ),
         title: Text(
           song.title,
