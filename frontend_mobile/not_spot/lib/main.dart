@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/state/auth_controller.dart';
 import 'features/songs/state/song_controller.dart';
+import 'features/settings/state/settings_controller.dart';
 
 void main() {
   runApp(
@@ -12,8 +13,16 @@ void main() {
         ChangeNotifierProvider(create: (_) => AuthController()),
         ChangeNotifierProvider(create: (_) => SongController()),
         ChangeNotifierProxyProvider<AuthController, PlaylistController>(
-          create: (context) => PlaylistController(context.read<AuthController>()),
-          update: (context, auth, previous) => previous ?? PlaylistController(auth),
+          create: (context) =>
+              PlaylistController(context.read<AuthController>()),
+          update: (context, auth, previous) =>
+              previous ?? PlaylistController(auth),
+        ),
+        ChangeNotifierProxyProvider<AuthController, SettingsController>(
+          create: (context) =>
+              SettingsController(context.read<AuthController>()),
+          update: (context, auth, previous) =>
+              previous ?? SettingsController(auth),
         ),
       ],
       child: const NotSpot(),
@@ -21,7 +30,7 @@ void main() {
   );
 }
 
-class NotSpot extends StatefulWidget{
+class NotSpot extends StatefulWidget {
   const NotSpot({super.key});
 
   @override

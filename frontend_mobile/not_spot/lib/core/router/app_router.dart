@@ -6,6 +6,7 @@ import '../../features/auth/state/auth_controller.dart';
 import '../../ui/screens/login_screen.dart';
 import '../../ui/screens/register_screen.dart';
 import '../../ui/screens/home_screen.dart';
+import '../../ui/screens/settings_screen.dart';
 
 class AppRouter {
   final AuthController authController;
@@ -37,6 +38,10 @@ class AppRouter {
       GoRoute(
         path: '/home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       )
     ],
   );
