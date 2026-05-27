@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../features/auth/state/auth_controller.dart';
+import '../../../core/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 class HomescreenHeader extends StatelessWidget {
   const HomescreenHeader({super.key});
@@ -37,7 +39,7 @@ class HomescreenHeader extends StatelessWidget {
           if (isDesktop)
             ElevatedButton.icon(
               onPressed: () {
-                // Go to profile / settings
+                context.go('/settings');
               },
               icon: const Icon(Icons.person),
               label: const Text("Account"),

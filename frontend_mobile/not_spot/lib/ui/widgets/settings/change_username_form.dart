@@ -43,7 +43,7 @@ class _ChangeUsernameFormState extends State<ChangeUsernameForm> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text("Chznge username"),
+                    : const Text("Change username"),
               ),
             ),
           ],
