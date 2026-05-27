@@ -48,15 +48,36 @@ class MiniPlayer extends StatelessWidget {
                 ],
               ),
             ),
-            IconButton(
-              icon: Icon(
-                controller.isPlaying
-                    ? Icons.pause_circle_filled
-                    : Icons.play_circle_filled,
-                color: Colors.white,
-                size: 36,
-              ),
-              onPressed: () => controller.togglePlayPause(),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.skip_previous_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                  onPressed: () => controller.playPrevious(),
+                ),
+                IconButton(
+                  icon: Icon(
+                    controller.isPlaying
+                        ? Icons.pause_circle_filled
+                        : Icons.play_circle_filled,
+                    color: Colors.white,
+                    size: 36,
+                  ),
+                  onPressed: () => controller.togglePlayPause(),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.skip_next_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                  onPressed: () => controller.playNext(),
+                ),
+              ],
             ),
           ],
         ),

@@ -80,7 +80,7 @@ class _LoginFormState extends State<LoginForm> {
           );
 
       if (success && mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        context.go('/home');
       }
     }
   }

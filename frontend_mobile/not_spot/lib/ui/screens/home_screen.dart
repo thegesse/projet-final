@@ -47,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () {
               context.read<AuthController>().logout();
+              context.read<SongController>().stopAndClear();
             },
           ),
         ],
@@ -88,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         song: song,
                         isCurrent: songController.currentSong?.id == song.id,
                         onTap: () {
-                          songController.selectSong(song);
+                          songController.selectSong(song, queue: songsToShow);
                         },
                       );
                     },
