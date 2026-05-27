@@ -216,38 +216,27 @@ class SongController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Fully stop any lingering native instances
-      await _audioPlayer.stop();
+      // Build the standard native background playlist structure
+      final playlist = ConcatenatingAudioSource(
+        children: _activeQueue.map((s) {
+          return AudioSource.uri(
+            AppConfig.uri(s.streamUrl), // Sanitizes URL format beautifully
+            tag: MediaItem(
+              id: s.id.toString(),
+              title: s.title,
+              artist: s.artist,
+            ),
+          );
+        }).toList(),
+      );
 
-      final streamUrlString = '${AppConfig.origin}${song.streamUrl}';
+      // Media Kit handles this flawlessly on Linux now!
+      await _audioPlayer.setAudioSource(
+        playlist,
+        initialIndex: _queueIndex,
+        initialPosition: Duration.zero,
+      );
 
-      if (Platform.isLinux) {
-        // FIX FOR LINUX: Avoid AudioSource completely. 
-        // Pass the raw string URL straight into the player engine.
-        await _audioPlayer.setUrl(streamUrlString);
-      } else {
-        // Mobile platform remains completely unaffected with its robust background features
-        final playlist = ConcatenatingAudioSource(
-          children: _activeQueue.map((s) {
-            return AudioSource.uri(
-              Uri.parse('${AppConfig.origin}${s.streamUrl}'),
-              tag: MediaItem(
-                id: s.id.toString(),
-                title: s.title,
-                artist: s.artist,
-              ),
-            );
-          }).toList(),
-        );
-
-        await _audioPlayer.setAudioSource(
-          playlist,
-          initialIndex: _queueIndex,
-          initialPosition: Duration.zero,
-        );
-      }
-
-      // 2. Play the stream safely
       await _audioPlayer.play();
     } catch (e) {
       _errorMessage = "couldn't play song $e";
@@ -255,8 +244,7 @@ class SongController extends ChangeNotifier {
     }
   }
 
-  // Updates the native audio source background array to synchronize shuffle states
-  // cleanly without interrupting the currently playing audio track stream
+  // update audio source without interrupting player
   Future<void> _updatePlayerPlaylistSilently() async {
     if (Platform.isLinux) return; // Skip playlist updates on Linux entirely
     try {
@@ -296,11 +284,10 @@ class SongController extends ChangeNotifier {
 
     if (_queueIndex < 0) _queueIndex = 0;
 
-    // Natively skip using the platform engine if a next track exists in our timeline container
+    //native skip inside audio player
     if (_audioPlayer.hasNext) {
       await _audioPlayer.seekToNext();
     } else {
-      // Loop back to the very first song if we are at the end of the playlist
       _queueIndex = (_queueIndex + 1) % _activeQueue.length;
       await _audioPlayer.seek(Duration.zero, index: _queueIndex);
     }
@@ -311,11 +298,10 @@ class SongController extends ChangeNotifier {
 
     if (_queueIndex < 0) _queueIndex = 0;
 
-    // Natively skip back using the platform engine if a previous track exists
+    //native skips again
     if (_audioPlayer.hasPrevious) {
       await _audioPlayer.seekToPrevious();
     } else {
-      // Loop around to the last song if we press back on the first track
       _queueIndex =
           (_queueIndex - 1) < 0 ? _activeQueue.length - 1 : _queueIndex - 1;
       await _audioPlayer.seek(Duration.zero, index: _queueIndex);

@@ -1,5 +1,5 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'dart:io' show Platform;
 import 'package:not_spot/features/playlist/state/playlist_controller.dart';
 import 'package:provider/provider.dart';
 import 'core/router/app_router.dart';
@@ -7,13 +7,14 @@ import 'features/auth/state/auth_controller.dart';
 import 'features/songs/state/song_controller.dart';
 import 'features/settings/state/settings_controller.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // If running on Mobile, we initialize the background notification thread.
-  // If running on Linux, just_audio_mpv registers itself automatically under the hood!
-  if (Platform.isAndroid || Platform.isIOS) {
+  //import magic, dont pay mind, I dont know what it does
+  if (Platform.isLinux) {
+    JustAudioMediaKit.ensureInitialized();
+  } else if (Platform.isAndroid || Platform.isIOS) {
     await JustAudioBackground.init(
       androidNotificationChannelId: 'com.notspot.app.channel.audio',
       androidNotificationChannelName: 'NotSpot Playback',
