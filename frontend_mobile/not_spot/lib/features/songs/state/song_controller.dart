@@ -6,6 +6,7 @@ import '../data/song_api.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../../core/config/app_config.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:rxdart/rxdart.dart';
 
 class SongController extends ChangeNotifier {
   final SongApi _songService = SongApi();
@@ -63,6 +64,7 @@ class SongController extends ChangeNotifier {
       _activeQueue; // Points to our managed active queue
   List<Song> get activeQueue => _activeQueue;
   bool get shuffleEnabled => _shuffleEnabled;
+  AudioPlayer get audioPlayer => _audioPlayer;
 
   bool get isLoading => _isLoading;
   bool get isSearching => _isSearching;
@@ -326,4 +328,26 @@ class SongController extends ChangeNotifier {
     _audioPlayer.dispose();
     super.dispose();
   }
+
+  Stream<PositionData> get positionDataStream =>
+    Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
+      _audioPlayer.positionStream,
+      _audioPlayer.bufferedPositionStream,
+      _audioPlayer.durationStream,
+      (position, bufferedPosition, duration) => PositionData(
+        position,
+        bufferedPosition,
+        duration ?? Duration.zero,
+      ),
+    );
+}
+
+
+//helper for the progress bar
+class PositionData {
+  final Duration position;
+  final Duration bufferedPosition;
+  final Duration duration;
+
+  PositionData(this.position, this.bufferedPosition, this.duration);
 }
