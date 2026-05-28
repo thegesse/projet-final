@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../../features/playlist/state/playlist_controller.dart';
-import '../widgets/playlist/playlist_card.dart';
-import '../widgets/playlist/create_playlist_dialog.dart';
+import '../../../../features/playlist/state/playlist_controller.dart';
+import '../../widgets/playlist/playlist_card.dart';
+import '../../widgets/playlist/create_playlist_dialog.dart';
 
 class PlaylistScreen extends StatefulWidget {
   const PlaylistScreen({super.key});

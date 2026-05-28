@@ -3,14 +3,14 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/state/auth_controller.dart';
 
 //screen
-import '../../ui/screens/login_screen.dart';
-import '../../ui/screens/register_screen.dart';
+import '../../ui/screens/secondary screens/login_screen.dart';
+import '../../ui/screens/secondary screens/register_screen.dart';
 import '../../ui/screens/home_screen.dart';
-import '../../ui/screens/settings_screen.dart';
-import '../../ui/screens/add_song_screen.dart';
-import '../../ui/screens/song_screen.dart';
-import '../../ui/screens/playlist_screen.dart';
-import '../../ui/screens/playlist_detail_screen.dart';
+import '../../ui/screens/main screens/settings_screen.dart';
+import '../../ui/screens/main screens/add_song_screen.dart';
+import '../../ui/screens/main screens/song_screen.dart';
+import '../../ui/screens/main screens/playlist_screen.dart';
+import '../../ui/screens/secondary screens/playlist_detail_screen.dart';
 
 class AppRouter {
   final AuthController authController;

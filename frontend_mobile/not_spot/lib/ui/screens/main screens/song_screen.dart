@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:not_spot/ui/widgets/song/mini_player.dart';
 import 'package:provider/provider.dart';
-import '../../features/songs/state/song_controller.dart';
-import '../widgets/song/mini_player_progress_bar.dart';
+import '../../../features/songs/state/song_controller.dart';
+import '../../widgets/song/mini_player_progress_bar.dart';
 import 'dart:ui';
 
 class SongScreen extends StatelessWidget{

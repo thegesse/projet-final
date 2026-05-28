@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:not_spot/features/playlist/state/playlist_controller.dart';
 import 'package:go_router/go_router.dart';
-import '../widgets/song/song_list.dart';
+import '../../widgets/song/song_list.dart';
 import 'package:not_spot/features/songs/state/song_controller.dart';
 
 

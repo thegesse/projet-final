@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../widgets/settings/change_password_form.dart';
-import '../widgets/settings/change_username_form.dart';
-import '../widgets/settings/delete_account_form.dart';
+import '../../widgets/settings/change_password_form.dart';
+import '../../widgets/settings/change_username_form.dart';
+import '../../widgets/settings/delete_account_form.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
