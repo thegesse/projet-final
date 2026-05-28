@@ -6,12 +6,14 @@ class SongList extends StatelessWidget {
   final Song song;
   final bool isCurrent;
   final VoidCallback onTap;
+  final VoidCallback? onRemovePressed;
 
   const SongList({
     super.key,
     required this.song,
     required this.isCurrent,
     required this.onTap,
+    this.onRemovePressed,
   });
 
   @override
@@ -68,7 +70,7 @@ class SongList extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => AddToPlaylistSheet(song: song),
+      builder: (context) => AddToPlaylistSheet(song: song, onRemovePressed: onRemovePressed),
     );
   }
 }

@@ -10,6 +10,7 @@ import '../../ui/screens/settings_screen.dart';
 import '../../ui/screens/add_song_screen.dart';
 import '../../ui/screens/song_screen.dart';
 import '../../ui/screens/playlist_screen.dart';
+import '../../ui/screens/playlist_detail_screen.dart';
 
 class AppRouter {
   final AuthController authController;
@@ -55,9 +56,16 @@ class AppRouter {
         builder: (context, state) => const SongScreen(),
       ),
       GoRoute(
-        path: 'playlists',
+        path: '/playlists',
         builder: (context, state) => const PlaylistScreen(),
       ),
+      GoRoute(
+        path: '/playlist/:id',
+        builder: (context, state) {
+          final playlistId = int.parse(state.pathParameters['id']!);
+          return PlaylistDetailScreen(playlistId: playlistId);
+        }
+      )
     ],
   );
 }

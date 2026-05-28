@@ -5,10 +5,12 @@ import '../../../features/songs/models/domain/song.dart';
 
 class AddToPlaylistSheet extends StatelessWidget {
   final Song song;
+  final VoidCallback? onRemovePressed; // Added field
 
   const AddToPlaylistSheet({
     super.key,
     required this.song,
+    this.onRemovePressed, // Added optional parameter to constructor
   });
 
   @override
@@ -22,6 +24,19 @@ class AddToPlaylistSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Drag handle accent line
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+
                 // Header
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -33,8 +48,7 @@ class AddToPlaylistSheet extends StatelessWidget {
                           width: 48,
                           height: 48,
                           color: Colors.grey.shade800,
-                          child: const Icon(Icons.music_note,
-                              color: Colors.white54),
+                          child: const Icon(Icons.music_note, color: Colors.white54),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -49,10 +63,7 @@ class AddToPlaylistSheet extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               song.title,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.grey,
                                   ),
                               maxLines: 1,
@@ -65,6 +76,22 @@ class AddToPlaylistSheet extends StatelessWidget {
                   ),
                 ),
                 const Divider(height: 24),
+
+                // INTEGRATED: Conditionally show the removal action row
+                if (onRemovePressed != null) ...[
+                  ListTile(
+                    leading: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                    title: const Text(
+                      'Remove from this playlist',
+                      style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context); // Close sheet UI first
+                      onRemovePressed!();    // Invoke the removal logic block
+                    },
+                  ),
+                  const Divider(height: 16), // Divider boundary between adding vs removing actions
+                ],
 
                 // Playlists list
                 if (controller.isLoading && controller.playlists.isEmpty)
@@ -124,14 +151,12 @@ class AddToPlaylistSheet extends StatelessWidget {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.add),
                           onTap: isAdding
                               ? null
-                              : () => _addToPlaylist(
-                                  context, controller, playlist.id),
+                              : () => _addToPlaylist(context, controller, playlist.id),
                         );
                       },
                     ),
@@ -156,9 +181,9 @@ class AddToPlaylistSheet extends StatelessWidget {
     if (success) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Added to playlist'),
-          duration: const Duration(seconds: 2),
+        const SnackBar(
+          content: Text('Added to playlist'),
+          duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );
