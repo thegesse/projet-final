@@ -7,6 +7,9 @@ import '../../ui/screens/login_screen.dart';
 import '../../ui/screens/register_screen.dart';
 import '../../ui/screens/home_screen.dart';
 import '../../ui/screens/settings_screen.dart';
+import '../../ui/screens/add_song_screen.dart';
+import '../../ui/screens/song_screen.dart';
+import '../../ui/screens/playlist_screen.dart';
 
 class AppRouter {
   final AuthController authController;
@@ -42,7 +45,19 @@ class AppRouter {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
-      )
+      ),
+      GoRoute(
+        path: '/addSong',
+        builder: (context, state) => const AddSongScreen(),
+      ),
+      GoRoute(
+        path: '/song',
+        builder: (context, state) => const SongScreen(),
+      ),
+      GoRoute(
+        path: 'playlists',
+        builder: (context, state) => const PlaylistScreen(),
+      ),
     ],
   );
 }
