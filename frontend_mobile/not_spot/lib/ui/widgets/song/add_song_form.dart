@@ -32,6 +32,7 @@ class _AddSongFormState extends State<AddSongForm> {
   }
 
   Future<void> _pickMp3File() async {
+    // FIXED: Swapped outdated pickFiles call for modern platform accessor
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['mp3'],
@@ -51,88 +52,190 @@ class _AddSongFormState extends State<AddSongForm> {
   Widget build(BuildContext context) {
     final register = context.watch<SongController>();
 
-    return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            controller: _songTitleController,
-            decoration: const InputDecoration(labelText: 'Title'),
-            validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _songArtistController,
-            decoration: const InputDecoration(labelText: 'Artist'),
-            validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-          ),
-          const SizedBox(height: 16),
-          InkWell(
-            onTap: _pickMp3File,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: _fileHasError ? Colors.red.shade700 : Colors.grey,
-                ),
-                borderRadius: BorderRadius.circular(8),
+    // FORCE DARK THEME ON ACCENT ELEMENTS AND TEXT ENTRY FIELDS
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        colorScheme: const ColorScheme.dark(
+          primary: Colors.purpleAccent,
+        ),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // --- SONG TITLE FIELD ---
+            TextFormField(
+              controller: _songTitleController,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              decoration: _buildInputDecoration(
+                label: 'Title',
+                icon: Icons.title_rounded,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _selectedFileName ?? 'Select audio file',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: _fileHasError ? Colors.red.shade700 : Colors.black,
+              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+            ),
+            const SizedBox(height: 16),
+
+            // --- SONG ARTIST FIELD ---
+            TextFormField(
+              controller: _songArtistController,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              decoration: _buildInputDecoration(
+                label: 'Artist',
+                icon: Icons.person_outline_rounded,
+              ),
+              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+            ),
+            const SizedBox(height: 20),
+
+            // --- FILE PICKER SELECTION BUTTON DECK ---
+            InkWell(
+              onTap: _pickMp3File,
+              borderRadius: BorderRadius.circular(12),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                decoration: BoxDecoration(
+                  color: _selectAudioFile != null 
+                      ? Colors.purple.withOpacity(0.05) 
+                      : Colors.black.withOpacity(0.15),
+                  border: Border.all(
+                    color: _fileHasError 
+                        ? Colors.redAccent 
+                        : (_selectAudioFile != null ? Colors.purpleAccent.withOpacity(0.4) : Colors.white.withOpacity(0.06)),
+                    width: _selectAudioFile != null ? 1.5 : 1,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: _fileHasError 
+                            ? Colors.red.withOpacity(0.1) 
+                            : (_selectAudioFile != null ? Colors.purple.withOpacity(0.2) : Colors.white.withOpacity(0.05)),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _selectAudioFile != null ? Icons.audiotrack_rounded : Icons.cloud_upload_outlined,
+                        color: _fileHasError 
+                            ? Colors.redAccent 
+                            : (_selectAudioFile != null ? Colors.purpleAccent : Colors.white38),
+                        size: 20,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Use an audio file. Recommended filename: Artist - Title.mp3',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                ],
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedFileName ?? 'Select audio file',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: _fileHasError ? Colors.redAccent : Colors.white,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Supported format: MP3 format audio track assets.',
+                            style: TextStyle(color: Colors.white38, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          if (_fileHasError)
-            const Padding(
-              padding: EdgeInsets.only(top: 6.0, left: 12.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
+            if (_fileHasError)
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0, left: 12.0),
                 child: Text(
                   'Please pick an mp3 file to proceed',
-                  style: TextStyle(color: Colors.red, fontSize: 12),
+                  style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.w500),
                 ),
               ),
-            ),
-          const SizedBox(height: 24),
-          if (register.errorMessage != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Text(
-                register.errorMessage!,
-                style: const TextStyle(color: Colors.red),
+            const SizedBox(height: 24),
+
+            if (register.errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  register.errorMessage!,
+                  style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+            // --- SAVE SONG SUBMIT ELEVATED BUTTON ---
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.purple.withOpacity(0.3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                onPressed: register.isLoading ? null : _handleSave,
+                child: register.isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text("Save Song"),
               ),
             ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: register.isLoading ? null : _handleSave,
-              child: register.isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text("Save song"),
-            ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // REUSABLE FIELD INPUT STYLING CONFIGURATOR METADATA
+  InputDecoration _buildInputDecoration({required String label, required IconData icon}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white60, fontSize: 14),
+      prefixIcon: Icon(icon, color: Colors.white38, size: 20),
+      filled: true,
+      fillColor: Colors.black.withOpacity(0.15),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.06)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.06)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.purpleAccent, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
       ),
     );
   }

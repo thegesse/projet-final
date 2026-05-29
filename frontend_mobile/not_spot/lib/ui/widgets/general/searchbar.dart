@@ -21,18 +21,23 @@ class _SearchBarState extends State<SearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 25, left: 25, right: 25),
+    // FORCE DARK THEME CALCULATION ON TEXT INPUT CURSORS AND TEXT
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        colorScheme: const ColorScheme.dark(
+          primary: Colors.purpleAccent,
+        ),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
-              Flexible(
-                flex: 1,
+              Expanded(
                 child: TextField(
                   controller: _searchController,
-                  cursorColor: Colors.grey,
+                  cursorColor: Colors.purpleAccent,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                   onChanged: (value) {
                     if (value.trim().isNotEmpty) {
                       context.read<PlaylistController>().clearCurrentPlaylist();
@@ -40,34 +45,64 @@ class _SearchBarState extends State<SearchBar> {
                     context.read<SongController>().searchSongs(value);
                   },
                   decoration: InputDecoration(
-                    fillColor: Colors.white,
+                    // Swapped out flat blinding white fill for a premium tinted transparent gray
+                    fillColor: const Color(0xFF1E1E1E),
                     filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                    hintText: 'Search',
+                    hintText: 'Search songs, artists...',
                     hintStyle: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 18,
+                      color: Colors.white38,
+                      fontSize: 16,
                     ),
-                    prefixIcon: Container(
-                      padding: const EdgeInsets.all(15),
-                      width: 18,
-                      // Fallback icon until you add asset images
-                      child: const Icon(Icons.search, color: Colors.grey),
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14.0),
+                      child: Icon(Icons.search_rounded,
+                          color: Colors.white60, size: 22),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 40,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: Colors.white.withOpacity(0.05)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: Colors.white.withOpacity(0.05)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                          color: Colors.purpleAccent, width: 1.5),
                     ),
                   ),
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(left: 10),
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(15),
+
+              // Filter/Tune Control Button
+              GestureDetector(
+                onTap: () {
+                  // Optional: handle opening search filter layouts later
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(left: 12),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.purpleAccent.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.tune_rounded,
+                    color: Colors.purpleAccent,
+                    size: 24,
+                  ),
                 ),
-                child: const Icon(Icons.tune, color: Colors.white),
               ),
             ],
           ),

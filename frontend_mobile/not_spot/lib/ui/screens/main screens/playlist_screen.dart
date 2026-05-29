@@ -47,7 +47,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth;
-          
+
           int crossAxisCount = 1;
           if (width > 1200) {
             crossAxisCount = 4; // Desktop large
@@ -60,7 +60,8 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
           final horizontalPadding = width > 900 ? 32.0 : 16.0;
 
           return RefreshIndicator(
-            onRefresh: () => context.read<PlaylistController>().fetchPlaylists(),
+            onRefresh: () =>
+                context.read<PlaylistController>().fetchPlaylists(),
             color: Theme.of(context).colorScheme.primary,
             backgroundColor: const Color(0xFF1E1E1E),
             child: CustomScrollView(
@@ -69,10 +70,9 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(
-                      left: horizontalPadding, 
-                      right: horizontalPadding, 
-                      bottom: 24.0
-                    ),
+                        left: horizontalPadding,
+                        right: horizontalPadding,
+                        bottom: 24.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -97,7 +97,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                     ),
                   ),
                 ),
-
                 if (controller.isLoading && playlists.isEmpty)
                   const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator()),
@@ -108,9 +107,11 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.error_outline, color: Colors.redAccent, size: 40),
+                          const Icon(Icons.error_outline,
+                              color: Colors.redAccent, size: 40),
                           const SizedBox(height: 12),
-                          Text(controller.errorMessage!, style: const TextStyle(color: Colors.white70)),
+                          Text(controller.errorMessage!,
+                              style: const TextStyle(color: Colors.white70)),
                           TextButton(
                             onPressed: () => controller.fetchPlaylists(),
                             child: const Text('Retry'),
@@ -125,16 +126,21 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.library_music_outlined, color: Colors.white.withOpacity(0.15), size: 64),
+                          Icon(Icons.library_music_outlined,
+                              color: Colors.white.withOpacity(0.15), size: 64),
                           const SizedBox(height: 16),
                           const Text(
                             'No playlists yet',
-                            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 6),
                           const Text(
                             'Create your first custom collection!',
-                            style: TextStyle(color: Colors.white38, fontSize: 14),
+                            style:
+                                TextStyle(color: Colors.white38, fontSize: 14),
                           ),
                           const SizedBox(height: 20),
                           ElevatedButton.icon(
@@ -149,11 +155,14 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                 else
                   // 3. Grid Adapter that behaves like a column layout on mobile and grid layout on desktop
                   SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding - 16), // balances internal card margins
+                    padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding -
+                            16), // balances internal card margins
                     sliver: SliverGrid(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
-                        mainAxisExtent: 86, // Keeps cards uniform and stops them stretching vertically
+                        mainAxisExtent:
+                            86, // Keeps cards uniform and stops them stretching vertically
                         crossAxisSpacing: 0,
                         mainAxisSpacing: 0,
                       ),

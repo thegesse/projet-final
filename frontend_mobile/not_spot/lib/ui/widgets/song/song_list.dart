@@ -21,39 +21,88 @@ class SongList extends StatelessWidget {
     final isDesktop = MediaQuery.of(context).size.width > 600;
 
     return Card(
-      elevation: isCurrent ? 2 : 0,
-      margin: const EdgeInsets.only(bottom: 8),
-      color: isCurrent
-          ? Theme.of(context).colorScheme.primary.withOpacity(0.85)
-          : Colors.transparent,
+      elevation: 0,
+      margin: const EdgeInsets.symmetric(
+          vertical: 4,
+          horizontal: 16), // Adjusted horizontal margin to line up with headers
+      color: isCurrent ? Colors.purple.withOpacity(0.12) : Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isCurrent
+              ? Colors.purpleAccent.withOpacity(0.4)
+              : Colors.transparent,
+          width: 1,
+        ),
+      ),
       child: ListTile(
         onTap: onTap,
-        leading: Icon(
-          isCurrent ? Icons.volume_up : Icons.music_note,
-          color:
-              isCurrent ? Theme.of(context).colorScheme.primary : Colors.grey,
-        ),
-        title: Text(
-          song.title,
-          style: TextStyle(
-            fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+
+        // --- LEADING TRACK BADGE ICON ---
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isCurrent
+                ? Colors.purple.withOpacity(0.2)
+                : Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            isCurrent ? Icons.volume_up_rounded : Icons.music_note_rounded,
+            color: isCurrent ? Colors.purpleAccent : Colors.white60,
+            size: 22,
           ),
         ),
-        subtitle: Text(song.artist),
+
+        // --- TRACK IDENTITY TEXTS ---
+        title: Text(
+          song.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: isCurrent ? Colors.purpleAccent : Colors.white,
+            fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
+            fontSize: 15,
+            letterSpacing: -0.1,
+          ),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: Text(
+            song.artist,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white38,
+              fontSize: 13,
+            ),
+          ),
+        ),
+
+        // --- TRAILING OPTIONS CONTROLS ---
         trailing: SizedBox(
-          width: isDesktop ? 200 : 50,
+          width: isDesktop ? 160 : 48,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               if (isDesktop) ...[
                 const Text(
-                  "3:45",
-                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                  "3:45", // Fallback runtime track duration
+                  style: TextStyle(
+                    color: Colors.white38,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
-                const SizedBox(width: 20),
+                const SizedBox(width: 24),
               ],
               IconButton(
-                icon: const Icon(Icons.more_vert),
+                icon:
+                    const Icon(Icons.more_vert_rounded, color: Colors.white38),
+                splashRadius: 22,
                 onPressed: () => _showSongOptions(context),
               ),
             ],
@@ -63,14 +112,26 @@ class SongList extends StatelessWidget {
     );
   }
 
+  // --- ACTIONS REGISTRY MENU BOTTOM SHEET ---
   void _showSongOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      backgroundColor: const Color(0xFF1E1E1E), // Match elevated charcoal tone
+      barrierColor: Colors.black
+          .withOpacity(0.6), // Darken back layout content stack focus
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        side: BorderSide(
+          color: Colors.white
+              .withOpacity(0.05), // Fixed matching upper border stroke line
+          width: 1,
+        ),
       ),
-      builder: (context) => AddToPlaylistSheet(song: song, onRemovePressed: onRemovePressed),
+      builder: (context) => AddToPlaylistSheet(
+        song: song,
+        onRemovePressed: onRemovePressed,
+      ),
     );
   }
 }
