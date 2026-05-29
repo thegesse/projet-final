@@ -36,14 +36,6 @@ class HomescreenHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          if (isDesktop)
-            ElevatedButton.icon(
-              onPressed: () {
-                context.go('/settings');
-              },
-              icon: const Icon(Icons.person),
-              label: const Text("Account"),
-            ),
         ],
       ),
     );

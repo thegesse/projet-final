@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../features/settings/state/settings_controller.dart';
+import '../../../features/auth/state/auth_controller.dart';
 
 class DeleteAccountForm extends StatelessWidget {
   const DeleteAccountForm({super.key});
@@ -44,12 +46,13 @@ class DeleteAccountForm extends StatelessWidget {
 
   Future<void> _showDeleteDialog(BuildContext context) async {
     final settings = context.read<SettingsController>();
+    final auth = context.read<AuthController>();
     final passwordController = TextEditingController();
 
-    final confirmed = await showDialog<bool>(
+    await showDialog<bool>(
       context: context,
-      barrierDismissible: !settings.isDeleting,
-      builder: (context) {
+      barrierDismissible: false,
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Confirm account deletion'),
           content: TextField(
@@ -61,21 +64,29 @@ class DeleteAccountForm extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: settings.isDeleting
-                  ? null
-                  : () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text('Cancel'),
             ),
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: Colors.red),
-              onPressed: settings.isDeleting
-                  ? null
-                  : () async {
-                      final ok =
-                          await settings.deleteAccount(passwordController.text);
-                      if (!context.mounted) return;
-                      Navigator.pop(context, ok);
-                    },
+              onPressed: () async {
+                final ok =
+                    await settings.deleteAccount(passwordController.text);
+                if (ok) {
+                  if (!dialogContext.mounted) return;
+                  Navigator.pop(dialogContext, true);
+
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Account deleted successfully.')),
+                    );
+                    auth.logout();
+                    context.go('/login');
+                  });
+                }
+              },
               child: const Text('Delete'),
             ),
           ],
@@ -84,11 +95,5 @@ class DeleteAccountForm extends StatelessWidget {
     );
 
     passwordController.dispose();
-
-    if (confirmed == true && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account deleted')),
-      );
-    }
   }
 }
