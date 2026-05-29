@@ -15,7 +15,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     //reminder to generate actual key with openssl rand -base64 64
-    private static final String SECRET = "secret";
+    private static final String SECRET = "dev-only-change-me-dev-only-change-me-dev-only-change-me-123456789";
     private final Key signingKey = Keys.hmacShaKeyFor(SECRET.getBytes());
 
     //24h for auth key, maybe reduce it later

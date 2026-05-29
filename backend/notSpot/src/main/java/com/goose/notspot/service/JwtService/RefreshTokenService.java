@@ -26,7 +26,6 @@ public class RefreshTokenService {
 
     @Transactional
     public RefreshToken createRefreshToken(String username) {
-        refreshTokenRepository.deleteByUserUsername(username);
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found" + username)));
