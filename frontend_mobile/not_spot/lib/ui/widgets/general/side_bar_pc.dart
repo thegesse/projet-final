@@ -98,8 +98,7 @@ class SideBarPc extends StatelessWidget {
           ),
           const VerticalDivider(thickness: 1, width: 1, color: Colors.black26),
           Expanded(
-            child:
-                child, // Injects your sub-screens dynamically right next to the rail
+            child: child,
           ),
         ],
       ),
