@@ -4,9 +4,11 @@ import com.goose.notspot.model.playlists.Playlist;
 import com.goose.notspot.model.user.DTO.UserDTO;
 import com.goose.notspot.model.user.User;
 import com.goose.notspot.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserCreationService {
@@ -21,7 +23,7 @@ public class UserCreationService {
 
     public UserDTO createUser(String username, String password, String email) {
         if (userRepository.existsByUsername(username)) {
-            throw new UsernameNotFoundException("Username " + username + " already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
         if (userRepository.existsByEmail(email)) {
             throw new UsernameNotFoundException("Email " + email + " already in use");
