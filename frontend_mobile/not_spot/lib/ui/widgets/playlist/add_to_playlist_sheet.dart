@@ -24,7 +24,7 @@ class AddToPlaylistSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Smooth Dark Drag Handle Accent Line
+                // Smooth Dark Drag Handle Accent Line
                 Center(
                   child: Container(
                     width: 40,
@@ -37,7 +37,7 @@ class AddToPlaylistSheet extends StatelessWidget {
                   ),
                 ),
 
-                // 2. Styled Header Section
+                // Styled Header Section
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
@@ -83,7 +83,7 @@ class AddToPlaylistSheet extends StatelessWidget {
                 const SizedBox(height: 12),
                 Divider(height: 1, color: Colors.white.withOpacity(0.08)),
 
-                // 3. Dynamic "Remove from Playlist" Row (Danger Accent)
+                //Dynamic "Remove from Playlist" Row (Danger Accent)
                 if (onRemovePressed != null) ...[
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),

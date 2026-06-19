@@ -42,11 +42,13 @@ class _LoginFormState extends State<LoginForm> {
             // --- USERNAME FIELD ---
             TextFormField(
               controller: _userController,
-              style: const TextStyle(color: Colors.white, fontSize: 15), // Explicit text color
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 15), // Explicit text color
               decoration: InputDecoration(
                 labelText: 'Username',
                 labelStyle: const TextStyle(color: Colors.white60),
-                prefixIcon: const Icon(Icons.person_outline_rounded, color: Colors.white38),
+                prefixIcon: const Icon(Icons.person_outline_rounded,
+                    color: Colors.white38),
                 filled: true,
                 fillColor: Colors.black.withOpacity(0.2),
                 border: OutlineInputBorder(
@@ -59,7 +61,8 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.purpleAccent, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Colors.purpleAccent, width: 1.5),
                 ),
               ),
               validator: (v) => v!.isEmpty ? 'Required' : null,
@@ -70,11 +73,13 @@ class _LoginFormState extends State<LoginForm> {
             TextFormField(
               controller: _passwordController,
               obscureText: true,
-              style: const TextStyle(color: Colors.white, fontSize: 15), // Explicit text color
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 15), // Explicit text color
               decoration: InputDecoration(
                 labelText: 'Password',
                 labelStyle: const TextStyle(color: Colors.white60),
-                prefixIcon: const Icon(Icons.lock_outline_rounded, color: Colors.white38),
+                prefixIcon: const Icon(Icons.lock_outline_rounded,
+                    color: Colors.white38),
                 filled: true,
                 fillColor: Colors.black.withOpacity(0.2),
                 border: OutlineInputBorder(
@@ -87,13 +92,14 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.purpleAccent, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Colors.purpleAccent, width: 1.5),
                 ),
               ),
               validator: (v) => v!.isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 24),
-            
+
             if (auth.errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -116,7 +122,8 @@ class _LoginFormState extends State<LoginForm> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 onPressed: auth.isLoading ? null : _handleLogin,
                 child: auth.isLoading
@@ -124,7 +131,7 @@ class _LoginFormState extends State<LoginForm> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2, 
+                          strokeWidth: 2,
                           color: Colors.white,
                         ),
                       )
@@ -147,14 +154,10 @@ class _LoginFormState extends State<LoginForm> {
 
   void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      final success = await context.read<AuthController>().login(
+      await context.read<AuthController>().login(
             _userController.text,
             _passwordController.text,
           );
-
-      if (success && mounted) {
-        context.go('/home');
-      }
     }
   }
 }

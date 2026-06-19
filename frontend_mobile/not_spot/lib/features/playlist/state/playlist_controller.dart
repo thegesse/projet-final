@@ -21,6 +21,7 @@ class PlaylistController extends ChangeNotifier {
   bool _isCreating = false;
   bool _isUpdating = false;
   bool _isDeleting = false;
+  bool _isCurrentSongLiked = false;
 
   String? _errorMessage;
   String? _createError;
@@ -34,6 +35,7 @@ class PlaylistController extends ChangeNotifier {
   bool get isCreating => _isCreating;
   bool get isUpdating => _isUpdating;
   bool get isDeleting => _isDeleting;
+  bool get isCurrentSongLiked => _isCurrentSongLiked;
 
   String? get errorMessage => _errorMessage;
   String? get createError => _createError;
@@ -158,6 +160,53 @@ class PlaylistController extends ChangeNotifier {
       return true;
     } catch (e) {
       _updateError = 'Failed to add song to playlist $e';
+      return false;
+    } finally {
+      _isUpdating = false;
+      notifyListeners();
+    }
+  }
+
+  void setLocalLikedStatus(bool liked) {
+    _isCurrentSongLiked = liked;
+    notifyListeners();
+  }
+
+  Future<bool> addSongToLikedPlaylist(Song song) async {
+    _isUpdating = true;
+    _updateError = null;
+    notifyListeners();
+
+    try {
+      final updated = await _playlistApi.addSongToLikedPlaylist(song);
+
+      _currentPlaylist = updated;
+      _playlists =
+          _playlists.map((p) => p.id == updated.id ? updated : p).toList();
+      return true;
+    } catch (e) {
+      _updateError = 'Failed to add song to liked playlist $e';
+      return false;
+    } finally {
+      _isUpdating = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> removeSongFromLikedPlaylist(Song song) async {
+    _isUpdating = true;
+    _updateError = null;
+    notifyListeners();
+
+    try {
+      final updated = await _playlistApi.removeSongFromLikedPlaylist(song);
+
+      _currentPlaylist = updated;
+      _playlists =
+          _playlists.map((p) => p.id == updated.id ? updated : p).toList();
+      return true;
+    } catch (e) {
+      _updateError = 'Failed to remove song from liked playlist $e';
       return false;
     } finally {
       _isUpdating = false;

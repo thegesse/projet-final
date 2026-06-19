@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../features/songs/state/song_controller.dart';
 import 'mini_player_progress_bar.dart'; // Ensure your progress bar import is linked here
+import 'shuffle_button.dart';
 
 class MiniPlayer extends StatelessWidget {
   const MiniPlayer({super.key});
@@ -94,6 +95,7 @@ class MiniPlayer extends StatelessWidget {
                           ),
                           onPressed: () => controller.playNext(),
                         ),
+                        const ShuffleButton(),
                       ],
                     ),
                   ],

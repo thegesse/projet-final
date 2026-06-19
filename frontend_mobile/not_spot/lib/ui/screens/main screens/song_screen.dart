@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:not_spot/ui/widgets/song/mini_player.dart';
 import 'package:provider/provider.dart';
 import '../../../features/songs/state/song_controller.dart';
 import '../../widgets/song/mini_player_progress_bar.dart';
@@ -20,7 +19,7 @@ class SongScreen extends StatelessWidget {
       );
     }
 
-    final currentSong = controller.currentSong;
+    final currentSong = controller.currentSong!;
     final screenSize = MediaQuery.of(context).size;
     final isDesktop = screenSize.width > 600;
 
@@ -34,7 +33,7 @@ class SongScreen extends StatelessWidget {
             color: Colors.white,
             size: 32,
           ),
-          onPressed: () => Navigator.of(context).pop,
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: Stack(
@@ -80,7 +79,7 @@ class SongScreen extends StatelessWidget {
                     Column(
                       children: [
                         Text(
-                          currentSong!.title,
+                          currentSong.title,
                           style: Theme.of(context)
                               .textTheme
                               .headlineMedium
@@ -93,7 +92,7 @@ class SongScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          currentSong!.artist,
+                          currentSong.artist,
                           style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
                                     color: Colors.white60,
@@ -112,7 +111,7 @@ class SongScreen extends StatelessWidget {
                               icon: const Icon(Icons.skip_previous_rounded),
                               iconSize: 44,
                               color: Colors.white,
-                              onPressed: () => controller.playPrevious,
+                              onPressed: () => controller.playPrevious(),
                             ),
                             IconButton(
                               icon: Icon(

@@ -27,7 +27,22 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController()),
-        ChangeNotifierProvider(create: (_) => SongController()),
+        ChangeNotifierProxyProvider<AuthController, SongController>(
+          create: (context) =>
+              SongController(authController: context.read<AuthController>()),
+          update: (context, auth, previous) {
+            if (previous == null) {
+              return SongController(authController: auth);
+            }
+
+            if (previous.authStateAtCreation != auth.isAuthenticated) {
+              previous.dispose();
+              return SongController(authController: auth);
+            }
+
+            return previous;
+          },
+        ),
         ChangeNotifierProxyProvider<AuthController, PlaylistController>(
           create: (context) =>
               PlaylistController(context.read<AuthController>()),
@@ -65,6 +80,19 @@ class _NotSpotState extends State<NotSpot> {
 
   @override
   Widget build(BuildContext context) {
+    final authLoading =
+        context.select<AuthController, bool>((auth) => auth.isLoading);
+
+    if (authLoading) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
     return MaterialApp.router(
       title: 'NotSpot',
       theme: ThemeData(primarySwatch: Colors.blue),

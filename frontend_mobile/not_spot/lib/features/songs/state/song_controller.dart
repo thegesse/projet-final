@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/domain/song.dart';
@@ -5,12 +6,21 @@ import '../models/requests/add_song_request.dart';
 import '../data/song_api.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../../core/config/app_config.dart';
+import '../../auth/state/auth_controller.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
 
 class SongController extends ChangeNotifier {
-  final SongApi _songService = SongApi();
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final SongApi _songService;
+  late AudioPlayer _audioPlayer;
+  StreamSubscription<PlayerState>? _playerStateSubscription;
+  StreamSubscription<int?>? _currentIndexSubscription;
+  final AuthController authController;
+  final bool authStateAtCreation;
+
+  Map<int, bool> _likedSongsCache = {};
+
+  bool isSongLiked(int songId) => _likedSongsCache[songId] ?? false;
 
   List<Song> _songs = [];
   List<Song> _searchResults = [];
@@ -18,37 +28,27 @@ class SongController extends ChangeNotifier {
 
   // Track the active play session queue and index
   List<Song> _activeQueue = [];
+  // Preserve original queue order when shuffle is enabled so we can restore it
+  List<Song>? _originalQueue;
   int _queueIndex = -1;
   bool _shuffleEnabled = false;
+  bool _isNavigating = false;
 
   bool _isLoading = false;
   bool _isSearching = false;
   bool _isUploading = false;
   bool _isDeleting = false;
+  bool _isCurrentSongLiked = false;
 
   String? _errorMessage;
   String? _uploadError;
   String? _deleteError;
 
-  SongController() {
-    _audioPlayer.playerStateStream.listen((playerState) {
-      notifyListeners();
-
-      if (playerState.processingState == ProcessingState.completed) {
-        _handleSongComplete();
-      }
-    });
-
-    // Native index changes from notification skips will update our current song selection
-    _audioPlayer.currentIndexStream.listen((index) {
-      if (index != null &&
-          _activeQueue.isNotEmpty &&
-          index < _activeQueue.length) {
-        _queueIndex = index;
-        _currentSong = _activeQueue[index];
-        notifyListeners();
-      }
-    });
+  SongController({required this.authController})
+      : _songService = SongApi(authController),
+        authStateAtCreation = authController.isAuthenticated {
+    _initializeAudioPlayer();
+    authController.addListener(_handleAuthChange);
   }
 
   void _handleSongComplete() {
@@ -71,6 +71,8 @@ class SongController extends ChangeNotifier {
   bool get isUploading => _isUploading;
   bool get isDeleting => _isDeleting;
   bool get isPlaying => _audioPlayer.playing;
+  bool get isShuffling => _shuffleEnabled;
+  bool get isCurrentSongLiked => _isCurrentSongLiked;
 
   String? get errorMessage => _errorMessage;
   String? get uploadError => _uploadError;
@@ -79,16 +81,21 @@ class SongController extends ChangeNotifier {
   bool get hasActiveSong => _currentSong != null;
 
   void setQueue(List<Song> queue, {Song? startSong}) {
-    _activeQueue = List<Song>.from(queue);
+    // Always store the original (ordered) queue so we can restore it when
+    // shuffle is turned off. The active queue is a working copy that may be
+    // shuffled.
+    _originalQueue = List<Song>.from(queue);
+
+    if (_shuffleEnabled) {
+      _activeQueue = List<Song>.from(_originalQueue!)..shuffle();
+    } else {
+      _activeQueue = List<Song>.from(_originalQueue!);
+    }
 
     if (_activeQueue.isEmpty) {
       _queueIndex = -1;
       notifyListeners();
       return;
-    }
-
-    if (_shuffleEnabled) {
-      _activeQueue.shuffle();
     }
 
     if (startSong != null) {
@@ -101,21 +108,47 @@ class SongController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleShuffle() {
+  Future<void> toggleShuffle() async {
     _shuffleEnabled = !_shuffleEnabled;
 
     if (_activeQueue.isNotEmpty) {
       final current = _currentSong;
-      _activeQueue = List<Song>.from(_activeQueue)..shuffle();
-      if (current != null) {
-        _queueIndex = _activeQueue.indexWhere((s) => s.id == current.id);
-        if (_queueIndex < 0) _queueIndex = 0;
+
+      if (_shuffleEnabled) {
+        // Enabling shuffle: preserve the current ordered queue and then
+        // shuffle the active queue.
+        _originalQueue = List<Song>.from(_activeQueue);
+        _activeQueue = List<Song>.from(_activeQueue)..shuffle();
       } else {
-        _queueIndex = 0;
+        // Disabling shuffle: restore the preserved original order when
+        // possible. Keep the current song selected.
+        if (_originalQueue != null) {
+          final currentId = current?.id;
+          _activeQueue = List<Song>.from(_originalQueue!);
+          if (currentId != null) {
+            _queueIndex = _activeQueue.indexWhere((s) => s.id == currentId);
+            if (_queueIndex < 0) _queueIndex = 0;
+          } else {
+            _queueIndex = 0;
+          }
+          _originalQueue = null;
+        } else {
+          // Fallback: if we don't have an original queue, attempt to order
+          // by the global `_songs` ordering.
+          _activeQueue.sort((a, b) {
+            final ai = _songs.indexWhere((s) => s.id == a.id);
+            final bi = _songs.indexWhere((s) => s.id == b.id);
+            return ai.compareTo(bi);
+          });
+          if (current != null) {
+            _queueIndex = _activeQueue.indexWhere((s) => s.id == current.id);
+            if (_queueIndex < 0) _queueIndex = 0;
+          }
+        }
       }
     }
 
-    // Refresh the player playlist sequence in the background with the new scrambled list
+    // Refresh the player playlist sequence in the background with the new list
     if (_currentSong != null) {
       _updatePlayerPlaylistSilently();
     }
@@ -159,6 +192,22 @@ class SongController extends ChangeNotifier {
       _isSearching = false;
       notifyListeners();
     }
+  }
+
+  void setLocalLikedStatus(bool liked) {
+    _isCurrentSongLiked = liked;
+    if (_currentSong != null) {
+      _likedSongsCache[_currentSong!.id] = liked;
+    }
+    notifyListeners();
+  }
+
+  void updateSongLikedCache(int songId, bool liked) {
+    _likedSongsCache[songId] = liked;
+    if (_currentSong?.id == songId) {
+      _isCurrentSongLiked = liked;
+    }
+    notifyListeners();
   }
 
   Future<bool> addSong({
@@ -248,12 +297,11 @@ class SongController extends ChangeNotifier {
 
   // update audio source without interrupting player
   Future<void> _updatePlayerPlaylistSilently() async {
-    if (Platform.isLinux) return; // Skip playlist updates on Linux entirely
     try {
       final playlist = ConcatenatingAudioSource(
         children: _activeQueue.map((s) {
           return AudioSource.uri(
-            Uri.parse('${AppConfig.origin}${s.streamUrl}'),
+            AppConfig.uri(s.streamUrl),
             tag: MediaItem(
               id: s.id.toString(),
               title: s.title,
@@ -268,7 +316,50 @@ class SongController extends ChangeNotifier {
         initialIndex: _queueIndex,
         initialPosition: _audioPlayer.position,
       );
-    } catch (_) {}
+    } catch (e) {
+      // Preserve silent failure but capture error for debugging
+      _errorMessage = 'Failed to update player playlist: $e';
+      notifyListeners();
+    }
+  }
+
+  Future<void> setSongLikedStatus(int songId, bool liked) async {
+    try {
+      if (liked) {
+        await _songService.addSongToLiked(songId);
+      } else {
+        await _songService.removeSongFromLiked(songId);
+      }
+      _isCurrentSongLiked = liked;
+      _likedSongsCache[songId] = liked;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = "Failed to update liked status: $e";
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchLikedStatus(int songId) async {
+    // 1. Safely grab the current username from your AuthController
+    final currentUsername = authController.username;
+
+    if (currentUsername == null) {
+      print("Cannot check liked status: User is not logged in.");
+      return;
+    }
+
+    try {
+      // 2. Pass the dynamic username cleanly down to the API layer
+      final isLiked = await _songService.checkIsSongLiked(
+        songId,
+        username: currentUsername,
+      );
+
+      _likedSongsCache[songId] = isLiked;
+      notifyListeners();
+    } catch (e) {
+      print("Error fetching liked status: $e");
+    }
   }
 
   Future<void> togglePlayPause() async {
@@ -282,66 +373,144 @@ class SongController extends ChangeNotifier {
   }
 
   Future<void> playNext() async {
-    if (_activeQueue.isEmpty) return;
+    if (_activeQueue.isEmpty || _isNavigating) return;
+    _isNavigating = true;
 
-    if (_queueIndex < 0) _queueIndex = 0;
+    try {
+      if (_queueIndex < 0) _queueIndex = 0;
+      final currentIndex = _audioPlayer.currentIndex ?? _queueIndex;
 
-    //native skip inside audio player
-    if (_audioPlayer.hasNext) {
-      await _audioPlayer.seekToNext();
-    } else {
-      _queueIndex = (_queueIndex + 1) % _activeQueue.length;
+      if (_audioPlayer.hasNext) {
+        try {
+          await _audioPlayer.seekToNext();
+          return;
+        } catch (_) {
+          // Fall back to direct seek if the native next operation fails.
+        }
+      }
+      _queueIndex = (currentIndex + 1) % _activeQueue.length;
       await _audioPlayer.seek(Duration.zero, index: _queueIndex);
+    } catch (e) {
+      _errorMessage = 'Failed to skip to next song: $e';
+      notifyListeners();
+    } finally {
+      _isNavigating = false;
     }
   }
 
   Future<void> playPrevious() async {
-    if (_activeQueue.isEmpty) return;
+    if (_activeQueue.isEmpty || _isNavigating) return;
+    _isNavigating = true;
 
-    if (_queueIndex < 0) _queueIndex = 0;
+    try {
+      if (_queueIndex < 0) _queueIndex = 0;
+      final currentIndex = _audioPlayer.currentIndex ?? _queueIndex;
 
-    //native skips again
-    if (_audioPlayer.hasPrevious) {
-      await _audioPlayer.seekToPrevious();
-    } else {
+      if (_audioPlayer.hasPrevious) {
+        try {
+          await _audioPlayer.seekToPrevious();
+          return;
+        } catch (_) {
+          // Fall back to direct seek if the native previous operation fails.
+        }
+      }
       _queueIndex =
-          (_queueIndex - 1) < 0 ? _activeQueue.length - 1 : _queueIndex - 1;
+          (currentIndex - 1) < 0 ? _activeQueue.length - 1 : currentIndex - 1;
       await _audioPlayer.seek(Duration.zero, index: _queueIndex);
+    } catch (e) {
+      _errorMessage = 'Failed to skip to previous song: $e';
+      notifyListeners();
+    } finally {
+      _isNavigating = false;
     }
   }
 
-  //because song wont stop playing once I logout
+  Future<void> _handleAuthChange() async {
+    if (!authController.isAuthenticated) {
+      await stopAndClear();
+    }
+  }
+
+  void _initializeAudioPlayer() {
+    _audioPlayer = AudioPlayer();
+
+    _playerStateSubscription =
+        _audioPlayer.playerStateStream.listen((playerState) {
+      notifyListeners();
+
+      if (playerState.processingState == ProcessingState.completed) {
+        _handleSongComplete();
+      }
+    });
+
+    _currentIndexSubscription = _audioPlayer.currentIndexStream.listen((index) {
+      if (index != null &&
+          _activeQueue.isNotEmpty &&
+          index < _activeQueue.length) {
+        _queueIndex = index;
+        _currentSong = _activeQueue[index];
+        notifyListeners();
+      }
+    });
+  }
+
+  Future<void> _disposeAudioPlayer() async {
+    await _playerStateSubscription?.cancel();
+    await _currentIndexSubscription?.cancel();
+
+    try {
+      await _audioPlayer.dispose();
+    } catch (_) {
+      // Ignore dispose failures during cleanup.
+    }
+
+    _playerStateSubscription = null;
+    _currentIndexSubscription = null;
+  }
+
+  // because song wont stop playing once I logout
   Future<void> stopAndClear() async {
-    await _audioPlayer.stop();
-    await _audioPlayer.setAudioSource(ConcatenatingAudioSource(children: []));
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.setAudioSource(ConcatenatingAudioSource(children: []));
+    } catch (_) {
+      // Ignore failures while cleaning up on logout.
+    }
+
+    await _disposeAudioPlayer();
+    _initializeAudioPlayer();
 
     _currentSong = null;
     _activeQueue = [];
-    _searchResults = [];
+    _originalQueue = null;
+    _shuffleEnabled = false;
     _queueIndex = -1;
+    _isCurrentSongLiked = false;
+    _searchResults = [];
+    _errorMessage = null;
 
     notifyListeners();
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    authController.removeListener(_handleAuthChange);
+    _disposeAudioPlayer();
     super.dispose();
   }
 
   Stream<PositionData> get positionDataStream =>
-    Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-      _audioPlayer.positionStream,
-      _audioPlayer.bufferedPositionStream,
-      _audioPlayer.durationStream,
-      (position, bufferedPosition, duration) => PositionData(
-        position,
-        bufferedPosition,
-        duration ?? Duration.zero,
-      ),
-    );
+      Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
+        _audioPlayer.positionStream,
+        _audioPlayer.bufferedPositionStream,
+        _audioPlayer.durationStream,
+        (position, bufferedPosition, duration) => PositionData(
+          position,
+          bufferedPosition,
+          duration ?? Duration.zero,
+        ),
+      );
 }
-
 
 //helper for the progress bar
 class PositionData {

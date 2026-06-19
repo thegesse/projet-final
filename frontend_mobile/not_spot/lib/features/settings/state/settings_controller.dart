@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../auth/models/domain/user.dart';
-import '../../auth/state/auth_controller.dart';
 import '../data/settings_api.dart';
 import '../requests/change_password_request.dart';
 import '../requests/change_username_request.dart';
@@ -38,7 +36,7 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final changeUsername = await _settingsApi
+      await _settingsApi
           .changeUsername(ChangeUsernameRequest(username: username));
       return true;
     } catch (e) {

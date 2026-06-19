@@ -33,7 +33,7 @@ class _AddSongFormState extends State<AddSongForm> {
 
   Future<void> _pickMp3File() async {
     // FIXED: Swapped outdated pickFiles call for modern platform accessor
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['mp3'],
       allowMultiple: false,
@@ -73,7 +73,8 @@ class _AddSongFormState extends State<AddSongForm> {
                 label: 'Title',
                 icon: Icons.title_rounded,
               ),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 16),
 
@@ -85,7 +86,8 @@ class _AddSongFormState extends State<AddSongForm> {
                 label: 'Artist',
                 icon: Icons.person_outline_rounded,
               ),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 20),
 
@@ -96,15 +98,18 @@ class _AddSongFormState extends State<AddSongForm> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                 decoration: BoxDecoration(
-                  color: _selectAudioFile != null 
-                      ? Colors.purple.withOpacity(0.05) 
+                  color: _selectAudioFile != null
+                      ? Colors.purple.withOpacity(0.05)
                       : Colors.black.withOpacity(0.15),
                   border: Border.all(
-                    color: _fileHasError 
-                        ? Colors.redAccent 
-                        : (_selectAudioFile != null ? Colors.purpleAccent.withOpacity(0.4) : Colors.white.withOpacity(0.06)),
+                    color: _fileHasError
+                        ? Colors.redAccent
+                        : (_selectAudioFile != null
+                            ? Colors.purpleAccent.withOpacity(0.4)
+                            : Colors.white.withOpacity(0.06)),
                     width: _selectAudioFile != null ? 1.5 : 1,
                   ),
                   borderRadius: BorderRadius.circular(12),
@@ -115,16 +120,22 @@ class _AddSongFormState extends State<AddSongForm> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: _fileHasError 
-                            ? Colors.red.withOpacity(0.1) 
-                            : (_selectAudioFile != null ? Colors.purple.withOpacity(0.2) : Colors.white.withOpacity(0.05)),
+                        color: _fileHasError
+                            ? Colors.red.withOpacity(0.1)
+                            : (_selectAudioFile != null
+                                ? Colors.purple.withOpacity(0.2)
+                                : Colors.white.withOpacity(0.05)),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _selectAudioFile != null ? Icons.audiotrack_rounded : Icons.cloud_upload_outlined,
-                        color: _fileHasError 
-                            ? Colors.redAccent 
-                            : (_selectAudioFile != null ? Colors.purpleAccent : Colors.white38),
+                        _selectAudioFile != null
+                            ? Icons.audiotrack_rounded
+                            : Icons.cloud_upload_outlined,
+                        color: _fileHasError
+                            ? Colors.redAccent
+                            : (_selectAudioFile != null
+                                ? Colors.purpleAccent
+                                : Colors.white38),
                         size: 20,
                       ),
                     ),
@@ -138,7 +149,9 @@ class _AddSongFormState extends State<AddSongForm> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: _fileHasError ? Colors.redAccent : Colors.white,
+                              color: _fileHasError
+                                  ? Colors.redAccent
+                                  : Colors.white,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -146,7 +159,8 @@ class _AddSongFormState extends State<AddSongForm> {
                           const SizedBox(height: 4),
                           const Text(
                             'Supported format: MP3 format audio track assets.',
-                            style: TextStyle(color: Colors.white38, fontSize: 12),
+                            style:
+                                TextStyle(color: Colors.white38, fontSize: 12),
                           ),
                         ],
                       ),
@@ -160,7 +174,10 @@ class _AddSongFormState extends State<AddSongForm> {
                 padding: EdgeInsets.only(top: 8.0, left: 12.0),
                 child: Text(
                   'Please pick an mp3 file to proceed',
-                  style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500),
                 ),
               ),
             const SizedBox(height: 24),
@@ -187,7 +204,8 @@ class _AddSongFormState extends State<AddSongForm> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 15),
                 ),
                 onPressed: register.isLoading ? null : _handleSave,
                 child: register.isLoading
@@ -209,7 +227,8 @@ class _AddSongFormState extends State<AddSongForm> {
   }
 
   // REUSABLE FIELD INPUT STYLING CONFIGURATOR METADATA
-  InputDecoration _buildInputDecoration({required String label, required IconData icon}) {
+  InputDecoration _buildInputDecoration(
+      {required String label, required IconData icon}) {
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(color: Colors.white60, fontSize: 14),
@@ -248,12 +267,12 @@ class _AddSongFormState extends State<AddSongForm> {
 
     if (formValid && _selectAudioFile != null) {
       final success = await context.read<SongController>().addSong(
-        request: AddSongRequest(
-          title: _songTitleController.text.trim(),
-          artist: _songArtistController.text.trim(),
-        ),
-        audiofile: _selectAudioFile!,
-      );
+            request: AddSongRequest(
+              title: _songTitleController.text.trim(),
+              artist: _songArtistController.text.trim(),
+            ),
+            audiofile: _selectAudioFile!,
+          );
 
       if (success && mounted) {
         context.go('/home');

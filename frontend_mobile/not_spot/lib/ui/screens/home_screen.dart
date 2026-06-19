@@ -71,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
               tooltip: 'Logout',
               onPressed: () {
                 context.read<AuthController>().logout();
-                context.read<SongController>().stopAndClear();
               },
             ),
           ),
@@ -85,40 +84,45 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
                   child: HomescreenHeader(),
                 ),
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
                   child: custom_search.SearchBar(),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12.0),
-                  child: PlaylistRail(), // Renders horizontal playlist selections
+                  child:
+                      PlaylistRail(), // Renders horizontal playlist selections
                 ),
-                
+
                 // Active dynamic playlist filter tag item indicator
                 if (playlistController.hasCurrentPlaylist)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 4.0),
                     child: InputChip(
                       label: Text(
                         'Viewing: ${playlistController.currentPlaylist!.title}',
                         style: const TextStyle(
-                          color: Colors.purpleAccent, 
+                          color: Colors.purpleAccent,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       backgroundColor: Colors.purple.withOpacity(0.15),
-                      deleteIcon: const Icon(Icons.cancel, color: Colors.purpleAccent, size: 18),
+                      deleteIcon: const Icon(Icons.cancel,
+                          color: Colors.purpleAccent, size: 18),
                       onDeleted: () {
                         playlistController.clearCurrentPlaylist();
                       },
                     ),
                   ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Main Content Workspace Area Switch Box
                 if (songController.isLoading)
                   const Expanded(
@@ -133,7 +137,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.all(24.0),
                         child: Text(
                           songController.errorMessage!,
-                          style: const TextStyle(color: Colors.redAccent, fontSize: 16),
+                          style: const TextStyle(
+                              color: Colors.redAccent, fontSize: 16),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -153,7 +158,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ListView.builder(
                       physics: const BouncingScrollPhysics(),
                       // Generous bottom layout spacing margin padding to safeguard scrolling elements from the miniplayer banner limits
-                      padding: EdgeInsets.fromLTRB(24, 0, 24, isDesktop ? 120 : 110),
+                      padding:
+                          EdgeInsets.fromLTRB(24, 0, 24, isDesktop ? 120 : 110),
                       itemCount: songsToShow.length,
                       itemBuilder: (context, index) {
                         final song = songsToShow[index];
@@ -162,9 +168,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: SongList(
                             song: song,
-                            isCurrent: songController.currentSong?.id == song.id,
+                            isCurrent:
+                                songController.currentSong?.id == song.id,
                             onTap: () {
-                              songController.selectSong(song, queue: songsToShow);
+                              songController.selectSong(song,
+                                  queue: songsToShow);
                             },
                           ),
                         );
@@ -174,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          
+
           // Fixed background opacity overlay layout wrapper hosting the MiniPlayer
           Positioned(
             left: 0,

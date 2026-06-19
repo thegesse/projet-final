@@ -32,7 +32,8 @@ class _RegisterFormState extends State<RegisterForm> {
     return Theme(
       data: ThemeData.dark().copyWith(
         colorScheme: const ColorScheme.dark(
-          primary: Colors.purpleAccent, // Color of active borders and cursor indicators
+          primary: Colors
+              .purpleAccent, // Color of active borders and cursor indicators
         ),
       ),
       child: Form(
@@ -48,7 +49,8 @@ class _RegisterFormState extends State<RegisterForm> {
               decoration: InputDecoration(
                 labelText: 'Username',
                 labelStyle: const TextStyle(color: Colors.white60),
-                prefixIcon: const Icon(Icons.person_outline_rounded, color: Colors.white38),
+                prefixIcon: const Icon(Icons.person_outline_rounded,
+                    color: Colors.white38),
                 filled: true,
                 fillColor: Colors.black.withOpacity(0.2),
                 border: OutlineInputBorder(
@@ -61,7 +63,8 @@ class _RegisterFormState extends State<RegisterForm> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.purpleAccent, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Colors.purpleAccent, width: 1.5),
                 ),
               ),
               validator: (v) => v!.isEmpty ? 'Required' : null,
@@ -76,7 +79,8 @@ class _RegisterFormState extends State<RegisterForm> {
               decoration: InputDecoration(
                 labelText: 'Email',
                 labelStyle: const TextStyle(color: Colors.white60),
-                prefixIcon: const Icon(Icons.email_outlined, color: Colors.white38),
+                prefixIcon:
+                    const Icon(Icons.email_outlined, color: Colors.white38),
                 filled: true,
                 fillColor: Colors.black.withOpacity(0.2),
                 border: OutlineInputBorder(
@@ -89,7 +93,8 @@ class _RegisterFormState extends State<RegisterForm> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.purpleAccent, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Colors.purpleAccent, width: 1.5),
                 ),
               ),
               validator: (v) => v!.contains('@') ? null : 'Invalid email',
@@ -106,7 +111,8 @@ class _RegisterFormState extends State<RegisterForm> {
                 labelStyle: const TextStyle(color: Colors.white60),
                 hintText: 'Must be at least 8 characters',
                 hintStyle: const TextStyle(color: Colors.white24, fontSize: 13),
-                prefixIcon: const Icon(Icons.lock_outline_rounded, color: Colors.white38),
+                prefixIcon: const Icon(Icons.lock_outline_rounded,
+                    color: Colors.white38),
                 filled: true,
                 fillColor: Colors.black.withOpacity(0.2),
                 border: OutlineInputBorder(
@@ -119,7 +125,8 @@ class _RegisterFormState extends State<RegisterForm> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.purpleAccent, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Colors.purpleAccent, width: 1.5),
                 ),
               ),
               validator: (v) {
@@ -133,7 +140,7 @@ class _RegisterFormState extends State<RegisterForm> {
               },
             ),
             const SizedBox(height: 24),
-            
+
             if (auth.errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -156,7 +163,8 @@ class _RegisterFormState extends State<RegisterForm> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 onPressed: auth.isLoading ? null : _handleRegister,
                 child: auth.isLoading
@@ -164,7 +172,7 @@ class _RegisterFormState extends State<RegisterForm> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2, 
+                          strokeWidth: 2,
                           color: Colors.white,
                         ),
                       )
@@ -187,16 +195,11 @@ class _RegisterFormState extends State<RegisterForm> {
 
   void _handleRegister() async {
     if (_formKey.currentState!.validate()) {
-      final success = await context.read<AuthController>().register(
+      await context.read<AuthController>().register(
             _userController.text,
             _emailController.text,
             _passwordController.text,
           );
-          
-      // FIXED: Swapped raw native Navigator call out for correct GoRouter context logic
-      if (success && mounted) {
-        context.go('/home'); 
-      }
     }
   }
 }

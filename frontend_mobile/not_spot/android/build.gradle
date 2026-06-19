@@ -5,14 +5,28 @@ allprojects {
     }
 }
 
-rootProject.buildDir = "../build"
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    // 1. Standard build directory configuration
+    project.layout.buildDirectory.set(rootProject.layout.buildDirectory.dir(project.name))
 }
+
+// 2. Safely force compileSdkVersion on subprojects without creating extension conflicts
+subprojects { subproject ->
+    afterEvaluate {
+        if (subproject.plugins.hasPlugin('com.android.library') || subproject.plugins.hasPlugin('com.android.application')) {
+            android {
+                compileSdkVersion 35
+            }
+        }
+    }
+}
+
 subprojects {
     project.evaluationDependsOn(":app")
 }
 
+rootProject.layout.buildDirectory.set(rootProject.file("../build"))
+
 tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }

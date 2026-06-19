@@ -10,6 +10,7 @@ import '../models/dto/playlist_dto.dart';
 import '../models/dto/short_playlist_dto.dart';
 import '../models/requests/add_song_to_playlist_request.dart';
 import '../models/requests/create_playlist_request.dart';
+import '../../songs/models/domain/song.dart';
 
 class PlaylistApi {
   final AuthController authController;
@@ -73,6 +74,44 @@ class PlaylistApi {
     return Playlist.fromDTO(dto);
   }
 
+  int _extractLikedPlaylistId(List<dynamic> playlists) {
+    final likedPlaylist = playlists.cast<Map<String, dynamic>>().firstWhere(
+          (p) =>
+              (p['title'] == 'Liked Songs' || p['title'] == 'Liked') ||
+              (p['name'] == 'Liked Songs' || p['name'] == 'Liked') ||
+              p['isLikedSystemPlaylist'] == true,
+          orElse: () => {},
+        );
+
+    final playlistId = likedPlaylist['id'];
+    if (playlistId == null) throw 'Liked playlist not found';
+
+    return playlistId as int;
+  }
+
+  Future<Playlist> addSongToLikedPlaylist(Song song) async {
+    final user = authController.currentUser;
+    if (user == null) throw 'Not authenticated';
+
+    final playlistsResponse = await ApiClient.get(
+      AppConfig.playlistsUri(username: user.username),
+    );
+
+    final int likedPlaylistId = _extractLikedPlaylistId(
+      playlistsResponse as List<dynamic>,
+    );
+
+    final response = await ApiClient.post(
+      AppConfig.playlistSongUri(
+        playlistId: likedPlaylistId,
+        username: user.username,
+      ),
+      AddSongToPlaylistRequest(songId: song.id).toJson(),
+    );
+
+    return Playlist.fromDTO(PlaylistDTO.fromJson(response));
+  }
+
   Future<Playlist> removeSongFromPlaylist(
     int playlistId,
     RemoveSongFromPlaylistRequest request,
@@ -90,6 +129,29 @@ class PlaylistApi {
 
     final dto = PlaylistDTO.fromJson(response as Map<String, dynamic>);
     return Playlist.fromDTO(dto);
+  }
+
+  Future<Playlist> removeSongFromLikedPlaylist(Song song) async {
+    final user = authController.currentUser;
+    if (user == null) throw 'Not authenticated';
+
+    final playlistsResponse = await ApiClient.get(
+      AppConfig.playlistsUri(username: user.username),
+    );
+
+    final int likedPlaylistId = _extractLikedPlaylistId(
+      playlistsResponse as List<dynamic>,
+    );
+
+    final response = await ApiClient.delete(
+      AppConfig.playlistSongUri(
+        playlistId: likedPlaylistId,
+        username: user.username,
+      ),
+      body: RemoveSongFromPlaylistRequest(songId: song.id).toJson(),
+    );
+
+    return Playlist.fromDTO(PlaylistDTO.fromJson(response));
   }
 
   Future<Playlist> renamePlaylist(

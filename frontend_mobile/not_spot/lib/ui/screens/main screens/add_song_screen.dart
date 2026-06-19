@@ -6,8 +6,6 @@ class AddSongScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 600;
-
     return Scaffold(
       // Smooth unified AMOLED dark backdrop
       backgroundColor: const Color(0xFF121212),

@@ -2,7 +2,7 @@ class AppConfig {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
     //only touch this to change the export case, then replace with domain url in prod
-    defaultValue: 'http://127.0.0.1:8080',
+    defaultValue: 'https://notspot.kaillou.de',
   );
   static Uri get baseUri => Uri.parse(baseUrl);
 
@@ -49,11 +49,15 @@ class AppConfig {
       uri('$playlistsPath/$playlistId/song', {'username': username});
 
   static Uri changeUsernameUri({required int userId}) =>
-    uri('$settingsPath/users/$userId/username');
+      uri('$settingsPath/users/$userId/username');
 
   static Uri changePasswordUri({required int userId}) =>
-    uri('$settingsPath/users/$userId/password');
+      uri('$settingsPath/users/$userId/password');
 
   static Uri deleteAccountUri({required int userId}) =>
-    uri('$settingsPath/users/$userId');
-}
+      uri('$settingsPath/users/$userId');
+
+  static Uri likedPlaylistSongUri({required int likedPlaylistId, required String username}) => 
+      uri('$playlistsPath/$likedPlaylistId/song', {'username': username});
+static Uri isSongLikedUri(int songId, {required String username}) => 
+    uri('$songsPath/$songId/isLiked', {'username': username});}

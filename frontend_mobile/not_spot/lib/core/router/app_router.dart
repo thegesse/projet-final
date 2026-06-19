@@ -36,6 +36,11 @@ class AppRouter {
     },
     routes: [
       GoRoute(
+        path: '/',
+        redirect: (context, state) =>
+            authController.isAuthenticated ? '/home' : '/login',
+      ),
+      GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
       ),
@@ -43,14 +48,12 @@ class AppRouter {
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
-      
       GoRoute(
-        path: '/playlist/:id',
-        builder: (context, state) {
-          final playlistId = int.parse(state.pathParameters['id']!);
-          return PlaylistDetailScreen(playlistId: playlistId);
-        }
-      ),
+          path: '/playlist/:id',
+          builder: (context, state) {
+            final playlistId = int.parse(state.pathParameters['id']!);
+            return PlaylistDetailScreen(playlistId: playlistId);
+          }),
       ShellRoute(
         builder: (context, state, child) {
           // Responsive Check: Use MediaQuery to check screen width
@@ -89,5 +92,4 @@ class AppRouter {
       )
     ],
   );
-     
 }

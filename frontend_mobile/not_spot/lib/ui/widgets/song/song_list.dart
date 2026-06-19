@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../features/songs/models/domain/song.dart';
 import '../playlist/add_to_playlist_sheet.dart';
+import '../playlist/add_to_liked_button.dart';
 
 class SongList extends StatelessWidget {
   final Song song;
@@ -84,26 +85,21 @@ class SongList extends StatelessWidget {
 
         // --- TRAILING OPTIONS CONTROLS ---
         trailing: SizedBox(
-          width: isDesktop ? 160 : 48,
+          width: isDesktop ? 200 : 88,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               if (isDesktop) ...[
-                const Text(
-                  "3:45", // Fallback runtime track duration
-                  style: TextStyle(
-                    color: Colors.white38,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(width: 24),
+                const SizedBox(width: 12),
               ],
+              AddToLikedButton(song: song),
               IconButton(
-                icon:
-                    const Icon(Icons.more_vert_rounded, color: Colors.white38),
-                splashRadius: 22,
                 onPressed: () => _showSongOptions(context),
+                icon: const Icon(
+                  Icons.more_vert_rounded,
+                  color: Colors.white60,
+                ),
+                tooltip: 'More options',
               ),
             ],
           ),
