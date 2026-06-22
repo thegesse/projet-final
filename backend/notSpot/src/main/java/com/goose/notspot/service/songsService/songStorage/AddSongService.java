@@ -5,6 +5,7 @@ import com.goose.notspot.model.songs.DTO.SongDTO;
 import com.goose.notspot.model.songs.Song;
 import com.goose.notspot.repository.SongRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -17,6 +18,7 @@ public class AddSongService {
         this.storeSongService = storeSongService;
     }
 
+    @Transactional
     public SongDTO addSong(CreateSongRequest request, MultipartFile file) {
         if(file == null || file.isEmpty()) {
             throw new IllegalArgumentException("audio file needed");

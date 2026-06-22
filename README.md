@@ -1,0 +1,110 @@
+# NotSpot
+
+NotSpot est une application de streaming musical permettant de creer un compte, se connecter, ecouter des musiques, rechercher des titres et organiser ses morceaux dans des playlists.
+
+Ce depot contient le backend de l'application NotSpot. Il expose l'API utilisee par l'application mobile et gere l'authentification, les musiques, le streaming audio, les playlists et les parametres utilisateur.
+
+## Telechargement
+
+Le telechargement de l'application se fait depuis le hub de telechargement NotSpot :
+
+[Acceder au hub de telechargement](https://thegesse.github.io/site-not-spot/)
+
+Ce site redirige vers les versions disponibles de l'application et centralise les informations utiles pour installer NotSpot.
+
+## Fonctionnement de l'application
+
+### Creation de compte
+
+L'utilisateur peut creer un compte avec :
+
+- un nom d'utilisateur ;
+- une adresse e-mail ;
+- un mot de passe.
+
+Apres l'inscription, l'application cree une session utilisateur et permet d'acceder aux fonctionnalites protegees.
+
+### Connexion
+
+L'utilisateur se connecte avec son nom d'utilisateur et son mot de passe. Une fois connecte, il peut consulter les musiques, ecouter des titres et gerer ses playlists.
+
+### Ecoute de musique
+
+Depuis l'accueil, l'utilisateur peut :
+
+- consulter la liste des musiques disponibles ;
+- rechercher une musique ;
+- selectionner un titre ;
+- lancer la lecture audio ;
+- utiliser le mini lecteur pendant la navigation.
+
+Le streaming audio est fourni par le backend, qui renvoie le fichier audio correspondant a la musique selectionnee.
+
+### Recherche
+
+La recherche permet de trouver rapidement une musique dans le catalogue. L'utilisateur saisit une requete, puis l'application affiche les titres correspondants.
+
+### Playlists
+
+L'utilisateur peut organiser ses musiques avec des playlists.
+
+Fonctionnalites disponibles :
+
+- creer une playlist ;
+- consulter ses playlists ;
+- ouvrir le detail d'une playlist ;
+- renommer une playlist ;
+- ajouter une musique dans une playlist ;
+- retirer une musique d'une playlist ;
+- supprimer une playlist.
+
+### Parametres du compte
+
+Depuis les parametres, l'utilisateur peut :
+
+- modifier son nom d'utilisateur ;
+- modifier son mot de passe ;
+- supprimer son compte.
+
+## Backend
+
+Le backend NotSpot est developpe avec Spring Boot. Il gere :
+
+- l'inscription et la connexion ;
+- les tokens JWT et refresh tokens ;
+- la protection des routes ;
+- la persistance en base PostgreSQL ;
+- le catalogue de musiques ;
+- l'upload et le stockage des fichiers audio ;
+- le streaming audio ;
+- les playlists ;
+- les parametres utilisateur.
+
+La documentation technique detaillee est disponible ici :
+
+[DOCUMENTATION_TECHNIQUE.md](./DOCUMENTATION_TECHNIQUE.md)
+
+Le cahier des charges est disponible ici :
+
+[CAHIER_DES_CHARGES.md](./CAHIER_DES_CHARGES.md)
+
+## Repos en lien avec ce projet
+
+- [site-not-spot](https://github.com/thegesse/site-not-spot) : site web servant de hub de telechargement et de presentation du projet.
+- [email-sender-CLI](https://github.com/thegesse/email-sender-CLI) : outil CLI lie a l'envoi d'e-mails pour l'ecosysteme du projet.
+- [back-end-not-spot](https://github.com/thegesse/back-end-not-spot) : repository du backend NotSpot. Ce repo correspond aussi au backend utilise en production pour l'instant.
+
+## Utilisation rapide
+
+Pour utiliser l'application en tant qu'utilisateur :
+
+1. Ouvrir le hub de telechargement.
+2. Installer l'application disponible.
+3. Creer un compte ou se connecter.
+4. Parcourir les musiques.
+5. Lancer une lecture.
+6. Creer des playlists pour organiser ses titres.
+
+## Notes
+
+Certaines fonctionnalites avancees sont prevues comme evolutions, notamment les roles administrateur, et l'historique d'ecoute.

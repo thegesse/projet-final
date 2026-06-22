@@ -2,6 +2,7 @@ package com.goose.notspot.service.songsService.songStorage;
 
 import com.goose.notspot.model.songs.Song;
 import com.goose.notspot.repository.SongRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
@@ -22,39 +23,27 @@ import java.util.stream.Stream;
 //application running so that it starts auto
 public class StartupSongImportService implements ApplicationRunner {
     private static final Logger logger = LoggerFactory.getLogger(StartupSongImportService.class);
-    private static final Path UPLOAD_DIR = resolveUploadDir();
     private static final Pattern ARTIST_TITLE_SEPARATOR = Pattern.compile("\\s+[-\u2013\u2014]\\s+");
 
     private final SongRepository songRepository;
+    private final Path uploadDir;
 
-    public StartupSongImportService(SongRepository songRepository) {
+    public StartupSongImportService(SongRepository songRepository, @Value("${app.song-storage.dir}") String uploadDir) {
         this.songRepository = songRepository;
-    }
-
-    private static Path resolveUploadDir() {
-        Path cwd = Paths.get(System.getProperty("user.dir", "."));
-        Path primary = cwd.resolve("uploads/songs");
-        if (Files.isDirectory(primary)) {
-            return primary;
-        }
-
-        // Common dev case: running Spring from repo root where "notSpot/" contains the app.
-        Path fallback = cwd.resolve("notSpot/uploads/songs");
-        if (Files.isDirectory(fallback)) {
-            return fallback;
-        }
-
-        return primary;
+        this.uploadDir = Paths.get(uploadDir);
     }
 
     @Override
     public void run(ApplicationArguments args) {
-        logger.info("Startup song import scan dir: {}", UPLOAD_DIR.toAbsolutePath());
-        if (!Files.isDirectory(UPLOAD_DIR)) {
-            return;
+        logger.info("Startup song import scan dir: {}", uploadDir.toAbsolutePath());
+
+        try {
+            Files.createDirectories(uploadDir);
+        } catch (IOException e) {
+            throw new RuntimeException("couldnt create song storage directory", e);
         }
 
-        try (Stream<Path> files = Files.list(UPLOAD_DIR)) {
+        try (Stream<Path> files = Files.list(uploadDir)) {
             files.filter(Files::isRegularFile)
                     .filter(this::isAudioFile)
                     .filter(path -> !songRepository.existsByAudioPath(path.toString()))
@@ -111,7 +100,7 @@ public class StartupSongImportService implements ApplicationRunner {
     private Path uniqueTargetPath(String extension) {
         Path targetPath;
         do {
-            targetPath = UPLOAD_DIR.resolve(UUID.randomUUID() + extension);
+            targetPath = uploadDir.resolve(UUID.randomUUID() + extension);
         } while (Files.exists(targetPath));
 
         return targetPath;

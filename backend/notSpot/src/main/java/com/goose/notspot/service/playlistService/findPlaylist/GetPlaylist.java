@@ -5,7 +5,10 @@ import com.goose.notspot.model.playlists.Playlist;
 import com.goose.notspot.model.songs.DTO.SongDTO;
 import com.goose.notspot.repository.PlaylistRepository;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -17,9 +20,10 @@ public class GetPlaylist {
         this.playlistRepository = playlistRepository;
     }
 
+    @Transactional(readOnly = true)
     public PlaylistVisuals getPlaylist(Long playlistId, String username) {
         Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
 
         if (!playlist.getOwner().getUsername().equals(username)) {
             throw new AccessDeniedException("You don't have permission to view this playlist");

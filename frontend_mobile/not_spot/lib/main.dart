@@ -8,19 +8,22 @@ import 'features/songs/state/song_controller.dart';
 import 'features/settings/state/settings_controller.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //import magic, dont pay mind, I dont know what it does
-  if (Platform.isLinux) {
-    JustAudioMediaKit.ensureInitialized();
-  } else if (Platform.isAndroid || Platform.isIOS) {
-    await JustAudioBackground.init(
-      androidNotificationChannelId: 'com.notspot.app.channel.audio',
-      androidNotificationChannelName: 'NotSpot Playback',
-      androidNotificationOngoing: true,
-      androidShowNotificationBadge: true,
-    );
+  if (!kIsWeb) {
+    if (Platform.isLinux) {
+      JustAudioMediaKit.ensureInitialized();
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      await JustAudioBackground.init(
+        androidNotificationChannelId: 'com.notspot.app.channel.audio',
+        androidNotificationChannelName: 'NotSpot Playback',
+        androidNotificationOngoing: true,
+        androidShowNotificationBadge: true,
+      );
+    }
   }
 
   runApp(
