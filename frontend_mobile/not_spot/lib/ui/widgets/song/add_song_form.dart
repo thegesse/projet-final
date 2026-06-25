@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +18,7 @@ class _AddSongFormState extends State<AddSongForm> {
   final _songTitleController = TextEditingController();
   final _songArtistController = TextEditingController();
 
-  File? _selectAudioFile;
+  PlatformFile? _selectAudioFile;
   String? _selectedFileName;
   bool _fileHasError = false;
 
@@ -37,12 +35,13 @@ class _AddSongFormState extends State<AddSongForm> {
       type: FileType.custom,
       allowedExtensions: ['mp3'],
       allowMultiple: false,
+      withData: true,
     );
 
-    if (result == null || result.files.single.path == null) return;
+    if (result == null) return;
 
     setState(() {
-      _selectAudioFile = File(result.files.single.path!);
+      _selectAudioFile = result.files.single;
       _selectedFileName = result.files.single.name;
       _fileHasError = false;
     });
@@ -182,11 +181,11 @@ class _AddSongFormState extends State<AddSongForm> {
               ),
             const SizedBox(height: 24),
 
-            if (register.errorMessage != null)
+            if (register.uploadError != null || register.errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
-                  register.errorMessage!,
+                  register.uploadError ?? register.errorMessage!,
                   style: const TextStyle(color: Colors.redAccent, fontSize: 13),
                   textAlign: TextAlign.center,
                 ),
@@ -207,8 +206,8 @@ class _AddSongFormState extends State<AddSongForm> {
                   textStyle: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 15),
                 ),
-                onPressed: register.isLoading ? null : _handleSave,
-                child: register.isLoading
+                onPressed: register.isUploading ? null : _handleSave,
+                child: register.isUploading
                     ? const SizedBox(
                         height: 20,
                         width: 20,

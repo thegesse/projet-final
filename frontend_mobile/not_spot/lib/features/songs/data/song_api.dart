@@ -1,6 +1,6 @@
-import 'dart:io';
 // ZA WARUDOOO TIME STOOP
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/network/api_client.dart';
@@ -106,14 +106,28 @@ class SongApi {
     return response != null;
   }
 
-  Future<Song> addSong(AddSongRequest request, File songFile) async {
+  Future<Song> addSong(AddSongRequest request, PlatformFile songFile) async {
     final dio = Dio();
+    final MultipartFile multipartFile;
+
+    if (songFile.bytes != null) {
+      multipartFile = MultipartFile.fromBytes(
+        songFile.bytes!,
+        filename: songFile.name,
+      );
+    } else if (songFile.path != null) {
+      multipartFile = await MultipartFile.fromFile(
+        songFile.path!,
+        filename: songFile.name,
+      );
+    } else {
+      throw 'Selected file could not be read';
+    }
 
     final formData = FormData.fromMap({
       'title': request.title,
       'artist': request.artist,
-      'file': await MultipartFile.fromFile(songFile.path,
-          filename: songFile.path.split('/').last),
+      'file': multipartFile,
     });
 
     final response = await dio.post(AppConfig.songsUri().toString(),

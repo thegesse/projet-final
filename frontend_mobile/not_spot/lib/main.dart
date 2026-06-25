@@ -1,30 +1,16 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:not_spot/features/playlist/state/playlist_controller.dart';
 import 'package:provider/provider.dart';
+import 'core/platform/audio_platform.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/state/auth_controller.dart';
 import 'features/songs/state/song_controller.dart';
 import 'features/settings/state/settings_controller.dart';
-import 'package:just_audio_background/just_audio_background.dart';
-import 'package:just_audio_media_kit/just_audio_media_kit.dart';
-import 'package:flutter/foundation.dart';
+import 'features/radio/controller/radio_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //import magic, dont pay mind, I dont know what it does
-  if (!kIsWeb) {
-    if (Platform.isLinux) {
-      JustAudioMediaKit.ensureInitialized();
-    } else if (Platform.isAndroid || Platform.isIOS) {
-      await JustAudioBackground.init(
-        androidNotificationChannelId: 'com.notspot.app.channel.audio',
-        androidNotificationChannelName: 'NotSpot Playback',
-        androidNotificationOngoing: true,
-        androidShowNotificationBadge: true,
-      );
-    }
-  }
+  await initializePlatformAudio();
 
   runApp(
     MultiProvider(
@@ -34,16 +20,19 @@ void main() async {
           create: (context) =>
               SongController(authController: context.read<AuthController>()),
           update: (context, auth, previous) {
-            if (previous == null) {
-              return SongController(authController: auth);
-            }
-
+            if (previous == null) return SongController(authController: auth);
             if (previous.authStateAtCreation != auth.isAuthenticated) {
-              previous.dispose();
               return SongController(authController: auth);
             }
-
             return previous;
+          },
+        ),
+        ChangeNotifierProxyProvider<SongController, RadioController>(
+          create: (context) => RadioController(context.read<SongController>()),
+          update: (context, songController, previous) {
+            final controller = previous ?? RadioController(songController);
+            controller.updateSongController(songController);
+            return controller;
           },
         ),
         ChangeNotifierProxyProvider<AuthController, PlaylistController>(

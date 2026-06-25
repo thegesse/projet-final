@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../models/domain/song.dart';
 import '../models/requests/add_song_request.dart';
@@ -17,8 +17,10 @@ class SongController extends ChangeNotifier {
   StreamSubscription<int?>? _currentIndexSubscription;
   final AuthController authController;
   final bool authStateAtCreation;
+  Future<void> _audioOperation = Future.value();
+  bool _isDisposed = false;
 
-  Map<int, bool> _likedSongsCache = {};
+  final Map<int, bool> _likedSongsCache = {};
 
   bool isSongLiked(int songId) => _likedSongsCache[songId] ?? false;
 
@@ -79,6 +81,23 @@ class SongController extends ChangeNotifier {
   String? get deleteError => _deleteError;
 
   bool get hasActiveSong => _currentSong != null;
+
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+      WidgetsBinding.instance.ensureVisualUpdate();
+    }
+  }
+
+  Future<void> _runAudioOperation(Future<void> Function() operation) {
+    _audioOperation = _audioOperation.catchError((_) {}).then((_) async {
+      if (_isDisposed) return;
+      await operation();
+    });
+
+    return _audioOperation;
+  }
 
   void setQueue(List<Song> queue, {Song? startSong}) {
     // Always store the original (ordered) queue so we can restore it when
@@ -212,7 +231,7 @@ class SongController extends ChangeNotifier {
 
   Future<bool> addSong({
     required AddSongRequest request,
-    required File audiofile,
+    required PlatformFile audiofile,
   }) async {
     _isUploading = true;
     _uploadError = null;
@@ -282,13 +301,15 @@ class SongController extends ChangeNotifier {
       );
 
       // Media Kit handles this flawlessly on Linux now!
-      await _audioPlayer.setAudioSource(
-        playlist,
-        initialIndex: _queueIndex,
-        initialPosition: Duration.zero,
-      );
+      await _runAudioOperation(() async {
+        await _audioPlayer.setAudioSource(
+          playlist,
+          initialIndex: _queueIndex,
+          initialPosition: Duration.zero,
+        );
 
-      await _audioPlayer.play();
+        await _audioPlayer.play();
+      });
     } catch (e) {
       _errorMessage = "couldn't play song $e";
       notifyListeners();
@@ -311,11 +332,13 @@ class SongController extends ChangeNotifier {
         }).toList(),
       );
 
-      await _audioPlayer.setAudioSource(
-        playlist,
-        initialIndex: _queueIndex,
-        initialPosition: _audioPlayer.position,
-      );
+      await _runAudioOperation(() async {
+        await _audioPlayer.setAudioSource(
+          playlist,
+          initialIndex: _queueIndex,
+          initialPosition: _audioPlayer.position,
+        );
+      });
     } catch (e) {
       // Preserve silent failure but capture error for debugging
       _errorMessage = 'Failed to update player playlist: $e';
@@ -344,7 +367,7 @@ class SongController extends ChangeNotifier {
     final currentUsername = authController.username;
 
     if (currentUsername == null) {
-      print("Cannot check liked status: User is not logged in.");
+      debugPrint("Cannot check liked status: User is not logged in.");
       return;
     }
 
@@ -358,18 +381,43 @@ class SongController extends ChangeNotifier {
       _likedSongsCache[songId] = isLiked;
       notifyListeners();
     } catch (e) {
-      print("Error fetching liked status: $e");
+      debugPrint("Error fetching liked status: $e");
     }
   }
 
   Future<void> togglePlayPause() async {
     if (!hasActiveSong) return;
 
-    if (_audioPlayer.playing) {
-      await _audioPlayer.pause();
-    } else {
+    await _runAudioOperation(() async {
+      if (_audioPlayer.playing) {
+        await _audioPlayer.pause();
+      } else {
+        await _audioPlayer.play();
+      }
+    });
+    notifyListeners();
+  }
+
+  //for radio sicne player is shared now
+  Future<void> playExternalAudioSource(
+    AudioSource source, {
+    bool preload = false,
+  }) async {
+    _currentSong = null;
+    _activeQueue = [];
+    _originalQueue = null;
+    _queueIndex = -1;
+    notifyListeners();
+
+    await _runAudioOperation(() async {
+      await _audioPlayer.setAudioSource(source, preload: preload);
       await _audioPlayer.play();
-    }
+    });
+    notifyListeners();
+  }
+
+  Future<void> stopExternalAudio() async {
+    await _runAudioOperation(() => _audioPlayer.stop());
   }
 
   Future<void> playNext() async {
@@ -378,23 +426,20 @@ class SongController extends ChangeNotifier {
 
     try {
       if (_queueIndex < 0) _queueIndex = 0;
-      final currentIndex = _audioPlayer.currentIndex ?? _queueIndex;
-
-      if (_audioPlayer.hasNext) {
-        try {
-          await _audioPlayer.seekToNext();
-          return;
-        } catch (_) {
-          // Fall back to direct seek if the native next operation fails.
-        }
-      }
+      final currentIndex = _queueIndex;
       _queueIndex = (currentIndex + 1) % _activeQueue.length;
-      await _audioPlayer.seek(Duration.zero, index: _queueIndex);
+      _currentSong = _activeQueue[_queueIndex];
+      notifyListeners();
+
+      await _runAudioOperation(
+        () => _audioPlayer.seek(Duration.zero, index: _queueIndex),
+      );
     } catch (e) {
       _errorMessage = 'Failed to skip to next song: $e';
       notifyListeners();
     } finally {
       _isNavigating = false;
+      notifyListeners();
     }
   }
 
@@ -404,24 +449,21 @@ class SongController extends ChangeNotifier {
 
     try {
       if (_queueIndex < 0) _queueIndex = 0;
-      final currentIndex = _audioPlayer.currentIndex ?? _queueIndex;
-
-      if (_audioPlayer.hasPrevious) {
-        try {
-          await _audioPlayer.seekToPrevious();
-          return;
-        } catch (_) {
-          // Fall back to direct seek if the native previous operation fails.
-        }
-      }
+      final currentIndex = _queueIndex;
       _queueIndex =
           (currentIndex - 1) < 0 ? _activeQueue.length - 1 : currentIndex - 1;
-      await _audioPlayer.seek(Duration.zero, index: _queueIndex);
+      _currentSong = _activeQueue[_queueIndex];
+      notifyListeners();
+
+      await _runAudioOperation(
+        () => _audioPlayer.seek(Duration.zero, index: _queueIndex),
+      );
     } catch (e) {
       _errorMessage = 'Failed to skip to previous song: $e';
       notifyListeners();
     } finally {
       _isNavigating = false;
+      notifyListeners();
     }
   }
 
@@ -459,6 +501,12 @@ class SongController extends ChangeNotifier {
     await _currentIndexSubscription?.cancel();
 
     try {
+      await _audioOperation.catchError((_) {});
+    } catch (_) {
+      // Ignore pending player failures during teardown.
+    }
+
+    try {
       await _audioPlayer.dispose();
     } catch (_) {
       // Ignore dispose failures during cleanup.
@@ -471,14 +519,15 @@ class SongController extends ChangeNotifier {
   // because song wont stop playing once I logout
   Future<void> stopAndClear() async {
     try {
-      await _audioPlayer.stop();
-      await _audioPlayer.setAudioSource(ConcatenatingAudioSource(children: []));
+      await _runAudioOperation(() async {
+        await _audioPlayer.stop();
+        await _audioPlayer.setAudioSource(
+          ConcatenatingAudioSource(children: []),
+        );
+      });
     } catch (_) {
       // Ignore failures while cleaning up on logout.
     }
-
-    await _disposeAudioPlayer();
-    _initializeAudioPlayer();
 
     _currentSong = null;
     _activeQueue = [];
@@ -494,6 +543,7 @@ class SongController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     authController.removeListener(_handleAuthChange);
     _disposeAudioPlayer();
     super.dispose();

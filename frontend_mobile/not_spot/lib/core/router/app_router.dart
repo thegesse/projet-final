@@ -11,6 +11,7 @@ import '../../ui/screens/main screens/add_song_screen.dart';
 import '../../ui/screens/main screens/song_screen.dart';
 import '../../ui/screens/main screens/playlist_screen.dart';
 import '../../ui/screens/secondary screens/playlist_detail_screen.dart';
+import '../../ui/screens/main screens/radio_screen.dart';
 
 //navbars
 import '../../ui/widgets/general/mobile_nav_bar.dart';
@@ -83,6 +84,10 @@ class AppRouter {
           GoRoute(
             path: '/song',
             builder: (context, state) => const SongScreen(),
+          ),
+          GoRoute(
+            path: '/radio',
+            builder: (context, state) => const RadioScreen(),
           ),
           GoRoute(
             path: '/playlists',

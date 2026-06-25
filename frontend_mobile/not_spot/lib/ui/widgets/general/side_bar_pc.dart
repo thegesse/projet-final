@@ -12,9 +12,10 @@ class SideBarPc extends StatelessWidget {
 
     if (location == '/home') selectedLocation = 0;
     if (location == '/playlists') selectedLocation = 1;
-    if (location == '/song') selectedLocation = 2;
-    if (location == '/addSong') selectedLocation = 3;
-    if (location == '/settings') selectedLocation = 4;
+    if (location == '/radio') selectedLocation = 2;
+    if (location == '/song') selectedLocation = 3;
+    if (location == '/addSong') selectedLocation = 4;
+    if (location == '/settings') selectedLocation = 5;
 
     return Scaffold(
       body: Row(
@@ -41,14 +42,16 @@ class SideBarPc extends StatelessWidget {
                   context.go('/playlists');
                   break;
                 case 2:
-                  context.go('/song');
+                  context.go('/radio');
                   break;
                 case 3:
-                  context.go('/addSong');
+                  context.go('/song');
                   break;
                 case 4:
-                  context.go('/settings');
+                  context.go('/addSong');
                   break;
+                case 5:
+                  context.go('/settings');
               }
             },
             leading: const Padding(
@@ -78,6 +81,11 @@ class SideBarPc extends StatelessWidget {
                 icon: Icon(Icons.playlist_play_outlined),
                 selectedIcon: Icon(Icons.playlist_play),
                 label: Text('Playlists'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.radio_outlined),
+                selectedIcon: Icon(Icons.radio),
+                label: Text('Radio'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.music_note_outlined),
