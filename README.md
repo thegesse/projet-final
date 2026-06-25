@@ -99,7 +99,7 @@ Le cahier des charges est disponible ici :
 Pour utiliser l'application en tant qu'utilisateur :
 
 1. Ouvrir le hub de telechargement.
-2. Installer l'application disponible.
+2. Installer l'application disponible.(pas d'installable pour windows ou apple pour l'instant)
 3. Creer un compte ou se connecter.
 4. Parcourir les musiques.
 5. Lancer une lecture.
