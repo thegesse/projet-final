@@ -497,6 +497,24 @@ Exemples :
 - mini lecteur ;
 - widgets de formulaire.
 
+### 12.4 Lecture audio Flutter
+
+La lecture audio est pilotee par :
+
+```text
+frontend_mobile/not_spot/lib/features/songs/state/song_controller.dart
+```
+
+Le controller utilise `just_audio` pour charger les URLs de streaming exposees par le backend. Le mini lecteur et l'ecran de lecture lisent l'etat courant depuis `SongController`.
+
+Points d'attention :
+
+- les commandes audio sont serialisees pour eviter les conflits entre chargement, pause, skip et stop ;
+- il ne faut pas attendre `AudioPlayer.play()` dans cette file de commandes : sur Flutter web, l'appel peut rester en attente pendant la lecture et bloquer les actions suivantes comme pause ou skip ;
+- la lecture doit donc etre lancee sans bloquer la file, via un appel non attendu (`unawaited`) ;
+- sur web, le controller recrée le `AudioPlayer` lors d'un changement de morceau pour eviter qu'un element audio du navigateur reste attache a l'ancien flux ;
+- sur mobile et Linux, le controller conserve une source concatenee (`ConcatenatingAudioSource`) afin de garder le comportement de playlist natif.
+
 ## 13. Communication Flutter/backend
 
 `AppConfig` centralise les URLs de l'API.
@@ -554,7 +572,25 @@ La variable `API_BASE_URL` peut etre fournie au build Flutter. Sinon, l'applicat
 
 ## 15. Lancement du projet
 
-### 15.1 Backend
+### 15.1 Backend recommande pour tester le frontend
+
+Pour tester le frontend Flutter actuel, il est recommande d'utiliser le backend stable maintenu dans le repository suivant :
+
+[https://github.com/thegesse/back-end-not-spot/tree/master](https://github.com/thegesse/back-end-not-spot/tree/master)
+
+Le backend present dans ce depot est en cours de refonte. Il n'est pas encore termine ni entierement teste avec le frontend actuel. Le frontend n'a pas encore ete adapte a toutes les differences de ce backend local.
+
+Exemple de recuperation :
+
+```sh
+git clone https://github.com/thegesse/back-end-not-spot.git
+cd back-end-not-spot
+git checkout master
+```
+
+Suivre ensuite les instructions de ce repository pour configurer PostgreSQL et lancer l'API.
+
+### 15.2 Backend de ce depot
 
 Depuis la racine du backend :
 
@@ -569,7 +605,9 @@ Pre-requis :
 - PostgreSQL disponible ;
 - variables de connexion configurees ou valeurs par defaut utilisables.
 
-### 15.2 Application mobile
+Ce backend est utile pour travailler sur la refonte backend, mais il ne doit pas etre considere comme la reference pour tester le frontend actuel tant que les contrats API ne sont pas totalement alignes.
+
+### 15.3 Application Flutter
 
 Depuis la racine du projet :
 
@@ -579,10 +617,45 @@ flutter pub get
 flutter run
 ```
 
+Pour tester en web :
+
+```sh
+flutter run -d chrome --web-port 3000
+```
+
+Pour pointer le frontend vers un backend local specifique :
+
+```sh
+flutter run -d chrome --web-port 3000 --dart-define=API_BASE_URL=http://localhost:8080
+```
+
 Pre-requis :
 
 - Flutter installe ;
 - backend accessible depuis l'URL configuree dans `AppConfig`.
+
+### 15.4 CORS avec Flutter web
+
+CORS est necessaire lorsque le frontend est lance avec Chrome, car le navigateur applique la politique same-origin. Par exemple :
+
+- frontend Flutter web : `http://localhost:3000` ;
+- backend API : `http://localhost:8080`.
+
+Ces deux URLs ont des origines differentes, donc le backend doit autoriser l'origine du frontend.
+
+Dans le backend de ce depot, la configuration CORS est definie dans :
+
+```text
+backend/notSpot/src/main/java/com/goose/notspot/configuration/SecurityConfig.java
+```
+
+La liste `setAllowedOrigins(...)` contient deja `http://localhost:3000`. Il est donc recommande de lancer Flutter web avec un port fixe :
+
+```sh
+flutter run -d chrome --web-port 3000 --dart-define=API_BASE_URL=http://localhost:8080
+```
+
+Si un autre port est utilise par Flutter web, il faut ajouter l'origine correspondante dans la configuration CORS du backend, par exemple `http://localhost:54321`.
 
 ## 16. Choix d'implementation
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/domain/song.dart';
 import '../models/requests/add_song_request.dart';
@@ -165,11 +166,12 @@ class SongController extends ChangeNotifier {
           }
         }
       }
-    }
 
-    // Refresh the player playlist sequence in the background with the new list
-    if (_currentSong != null) {
-      _updatePlayerPlaylistSilently();
+      final currentId = current?.id;
+      if (currentId != null) {
+        final currentIndex = _activeQueue.indexWhere((s) => s.id == currentId);
+        if (currentIndex >= 0) _queueIndex = currentIndex;
+      }
     }
 
     notifyListeners();
@@ -281,67 +283,16 @@ class SongController extends ChangeNotifier {
       _queueIndex = idx >= 0 ? idx : 0;
     }
 
-    _currentSong = song;
-    _errorMessage = null;
-    notifyListeners();
+    _setCurrentSongAtIndex(_queueIndex);
 
     try {
-      // Build the standard native background playlist structure
-      final playlist = ConcatenatingAudioSource(
-        children: _activeQueue.map((s) {
-          return AudioSource.uri(
-            AppConfig.uri(s.streamUrl), // Sanitizes URL format beautifully
-            tag: MediaItem(
-              id: s.id.toString(),
-              title: s.title,
-              artist: s.artist,
-            ),
-          );
-        }).toList(),
-      );
-
-      // Media Kit handles this flawlessly on Linux now!
-      await _runAudioOperation(() async {
-        await _audioPlayer.setAudioSource(
-          playlist,
-          initialIndex: _queueIndex,
-          initialPosition: Duration.zero,
-        );
-
-        await _audioPlayer.play();
-      });
+      if (kIsWeb) {
+        await _playWebSongAtIndex(_queueIndex);
+      } else {
+        await _playNativeQueueAtIndex(_queueIndex);
+      }
     } catch (e) {
       _errorMessage = "couldn't play song $e";
-      notifyListeners();
-    }
-  }
-
-  // update audio source without interrupting player
-  Future<void> _updatePlayerPlaylistSilently() async {
-    try {
-      final playlist = ConcatenatingAudioSource(
-        children: _activeQueue.map((s) {
-          return AudioSource.uri(
-            AppConfig.uri(s.streamUrl),
-            tag: MediaItem(
-              id: s.id.toString(),
-              title: s.title,
-              artist: s.artist,
-            ),
-          );
-        }).toList(),
-      );
-
-      await _runAudioOperation(() async {
-        await _audioPlayer.setAudioSource(
-          playlist,
-          initialIndex: _queueIndex,
-          initialPosition: _audioPlayer.position,
-        );
-      });
-    } catch (e) {
-      // Preserve silent failure but capture error for debugging
-      _errorMessage = 'Failed to update player playlist: $e';
       notifyListeners();
     }
   }
@@ -392,7 +343,7 @@ class SongController extends ChangeNotifier {
       if (_audioPlayer.playing) {
         await _audioPlayer.pause();
       } else {
-        await _audioPlayer.play();
+        _startPlayback();
       }
     });
     notifyListeners();
@@ -410,8 +361,11 @@ class SongController extends ChangeNotifier {
     notifyListeners();
 
     await _runAudioOperation(() async {
+      if (kIsWeb) {
+        await _replaceAudioPlayer();
+      }
       await _audioPlayer.setAudioSource(source, preload: preload);
-      await _audioPlayer.play();
+      _startPlayback();
     });
     notifyListeners();
   }
@@ -427,13 +381,14 @@ class SongController extends ChangeNotifier {
     try {
       if (_queueIndex < 0) _queueIndex = 0;
       final currentIndex = _queueIndex;
-      _queueIndex = (currentIndex + 1) % _activeQueue.length;
-      _currentSong = _activeQueue[_queueIndex];
-      notifyListeners();
+      final nextIndex = (currentIndex + 1) % _activeQueue.length;
+      _setCurrentSongAtIndex(nextIndex);
 
-      await _runAudioOperation(
-        () => _audioPlayer.seek(Duration.zero, index: _queueIndex),
-      );
+      if (kIsWeb) {
+        await _playWebSongAtIndex(nextIndex);
+      } else {
+        await _seekNativeQueueToIndex(nextIndex);
+      }
     } catch (e) {
       _errorMessage = 'Failed to skip to next song: $e';
       notifyListeners();
@@ -450,14 +405,15 @@ class SongController extends ChangeNotifier {
     try {
       if (_queueIndex < 0) _queueIndex = 0;
       final currentIndex = _queueIndex;
-      _queueIndex =
+      final previousIndex =
           (currentIndex - 1) < 0 ? _activeQueue.length - 1 : currentIndex - 1;
-      _currentSong = _activeQueue[_queueIndex];
-      notifyListeners();
+      _setCurrentSongAtIndex(previousIndex);
 
-      await _runAudioOperation(
-        () => _audioPlayer.seek(Duration.zero, index: _queueIndex),
-      );
+      if (kIsWeb) {
+        await _playWebSongAtIndex(previousIndex);
+      } else {
+        await _seekNativeQueueToIndex(previousIndex);
+      }
     } catch (e) {
       _errorMessage = 'Failed to skip to previous song: $e';
       notifyListeners();
@@ -465,6 +421,79 @@ class SongController extends ChangeNotifier {
       _isNavigating = false;
       notifyListeners();
     }
+  }
+
+  AudioSource _audioSourceForSong(Song song) {
+    final streamUri = Uri.parse(song.streamUrl);
+
+    return AudioSource.uri(
+      streamUri.hasScheme ? streamUri : AppConfig.uri(song.streamUrl),
+      tag: MediaItem(
+        id: song.id.toString(),
+        title: song.title,
+        artist: song.artist,
+      ),
+    );
+  }
+
+  ConcatenatingAudioSource _playlistSourceForQueue() {
+    return ConcatenatingAudioSource(
+      children: _activeQueue.map(_audioSourceForSong).toList(),
+    );
+  }
+
+  void _setCurrentSongAtIndex(int index) {
+    if (index < 0 || index >= _activeQueue.length) return;
+
+    final song = _activeQueue[index];
+    _queueIndex = index;
+    _currentSong = song;
+    _isCurrentSongLiked = _likedSongsCache[song.id] ?? false;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  Future<void> _playWebSongAtIndex(int index) async {
+    if (index < 0 || index >= _activeQueue.length) return;
+
+    final song = _activeQueue[index];
+
+    await _runAudioOperation(() async {
+      await _replaceAudioPlayer();
+      await _audioPlayer.setAudioSource(
+        _audioSourceForSong(song),
+        initialPosition: Duration.zero,
+      );
+      _startPlayback();
+    });
+  }
+
+  Future<void> _playNativeQueueAtIndex(int index) async {
+    if (index < 0 || index >= _activeQueue.length) return;
+
+    await _runAudioOperation(() async {
+      await _audioPlayer.setAudioSource(
+        _playlistSourceForQueue(),
+        initialIndex: index,
+        initialPosition: Duration.zero,
+      );
+      _startPlayback();
+    });
+  }
+
+  void _startPlayback() {
+    unawaited(
+      _audioPlayer.play().catchError((Object error) {
+        _errorMessage = 'Playback failed: $error';
+        notifyListeners();
+      }),
+    );
+  }
+
+  Future<void> _seekNativeQueueToIndex(int index) async {
+    await _runAudioOperation(
+      () => _audioPlayer.seek(Duration.zero, index: index),
+    );
   }
 
   Future<void> _handleAuthChange() async {
@@ -475,7 +504,10 @@ class SongController extends ChangeNotifier {
 
   void _initializeAudioPlayer() {
     _audioPlayer = AudioPlayer();
+    _attachAudioPlayerListeners();
+  }
 
+  void _attachAudioPlayerListeners() {
     _playerStateSubscription =
         _audioPlayer.playerStateStream.listen((playerState) {
       notifyListeners();
@@ -485,15 +517,42 @@ class SongController extends ChangeNotifier {
       }
     });
 
-    _currentIndexSubscription = _audioPlayer.currentIndexStream.listen((index) {
-      if (index != null &&
-          _activeQueue.isNotEmpty &&
-          index < _activeQueue.length) {
-        _queueIndex = index;
-        _currentSong = _activeQueue[index];
-        notifyListeners();
-      }
-    });
+    if (!kIsWeb) {
+      _currentIndexSubscription =
+          _audioPlayer.currentIndexStream.listen((index) {
+        if (index != null &&
+            _activeQueue.isNotEmpty &&
+            index < _activeQueue.length) {
+          _queueIndex = index;
+          _currentSong = _activeQueue[index];
+          notifyListeners();
+        }
+      });
+    }
+  }
+
+  Future<void> _replaceAudioPlayer() async {
+    final oldPlayer = _audioPlayer;
+
+    await _playerStateSubscription?.cancel();
+    await _currentIndexSubscription?.cancel();
+    _playerStateSubscription = null;
+    _currentIndexSubscription = null;
+
+    _audioPlayer = AudioPlayer();
+    _attachAudioPlayerListeners();
+
+    try {
+      await oldPlayer.stop();
+    } catch (_) {
+      // Ignore failures while replacing the web audio element.
+    }
+
+    try {
+      await oldPlayer.dispose();
+    } catch (_) {
+      // Ignore failures while replacing the web audio element.
+    }
   }
 
   Future<void> _disposeAudioPlayer() async {
@@ -520,10 +579,14 @@ class SongController extends ChangeNotifier {
   Future<void> stopAndClear() async {
     try {
       await _runAudioOperation(() async {
-        await _audioPlayer.stop();
-        await _audioPlayer.setAudioSource(
-          ConcatenatingAudioSource(children: []),
-        );
+        if (kIsWeb) {
+          await _replaceAudioPlayer();
+        } else {
+          await _audioPlayer.stop();
+          await _audioPlayer.setAudioSource(
+            ConcatenatingAudioSource(children: []),
+          );
+        }
       });
     } catch (_) {
       // Ignore failures while cleaning up on logout.

@@ -80,6 +80,12 @@ Le backend NotSpot est developpe avec Spring Boot. Il gere :
 - les playlists ;
 - les parametres utilisateur.
 
+Important : pour tester l'application frontend actuelle en local, il est recommande d'utiliser le backend suivant :
+
+[https://github.com/thegesse/back-end-not-spot/tree/master](https://github.com/thegesse/back-end-not-spot/tree/master)
+
+Le backend present dans ce depot est en cours de refonte. Il n'est pas encore termine ni entierement teste avec le frontend actuel. Le frontend n'a pas encore ete adapte a toutes les differences de ce backend local.
+
 La documentation technique detaillee est disponible ici :
 
 [DOCUMENTATION_TECHNIQUE.md](./DOCUMENTATION_TECHNIQUE.md)
@@ -104,6 +110,75 @@ Pour utiliser l'application en tant qu'utilisateur :
 4. Parcourir les musiques.
 5. Lancer une lecture.
 6. Creer des playlists pour organiser ses titres.
+
+## Lancer le projet en local pour tester
+
+### Backend recommande
+
+Pour tester le frontend actuel, cloner et lancer le backend stable :
+
+```sh
+git clone https://github.com/thegesse/back-end-not-spot.git
+cd back-end-not-spot
+git checkout master
+```
+
+Suivre ensuite les instructions de ce repository pour configurer la base de donnees et lancer l'API.
+
+### Frontend Flutter
+
+Depuis ce depot :
+
+```sh
+cd frontend_mobile/not_spot
+flutter pub get
+flutter run
+```
+
+Pour tester la version web :
+
+```sh
+flutter run -d chrome --web-port 3000
+```
+
+Si le backend ne tourne pas sur l'URL par defaut du frontend, fournir l'URL au lancement :
+
+```sh
+flutter run --dart-define=API_BASE_URL=http://localhost:8080
+```
+
+### CORS pour Flutter web
+
+Oui, CORS est necessaire pour tester avec `flutter run -d chrome`, car le frontend web est servi depuis une origine du type `http://localhost:3000` et appelle le backend sur une autre origine, par exemple `http://localhost:8080`.
+
+Pour eviter les erreurs CORS :
+
+- lancer Flutter web sur un port fixe autorise par le backend :
+
+```sh
+flutter run -d chrome --web-port 3000 --dart-define=API_BASE_URL=http://localhost:8080
+```
+
+- verifier que le backend autorise cette origine dans sa configuration CORS.
+
+Dans le backend de ce depot, la configuration se trouve dans :
+
+```text
+backend/notSpot/src/main/java/com/goose/notspot/configuration/SecurityConfig.java
+```
+
+L'origine `http://localhost:3000` est deja presente dans `setAllowedOrigins(...)`. Si vous lancez Flutter web sur un autre port, ajoutez cette origine a la liste ou utilisez `--web-port 3000`.
+
+### Backend de ce depot
+
+Le backend inclus dans ce depot peut etre lance pour developpement backend, mais il n'est pas le choix recommande pour tester le frontend actuel :
+
+```sh
+cd backend/notSpot
+./mvnw spring-boot:run
+```
+
+Il peut necessiter des adaptations cote frontend car les contrats API ne sont pas encore totalement alignes.
 
 ## Notes
 

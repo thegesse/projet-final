@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../features/radio/controller/radio_controller.dart';
 import '../../../features/songs/state/song_controller.dart';
 import '../../widgets/song/mini_player_progress_bar.dart';
 import 'dart:ui';
+
+void _closePlayer(BuildContext context) {
+  final router = GoRouter.of(context);
+  if (router.canPop()) {
+    router.pop();
+  } else {
+    context.go('/home');
+  }
+}
 
 class SongScreen extends StatelessWidget {
   const SongScreen({super.key});
@@ -51,7 +61,7 @@ class SongScreen extends StatelessWidget {
             color: Colors.white,
             size: 32,
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => _closePlayer(context),
         ),
       ),
       body: Stack(
@@ -188,7 +198,7 @@ class _RadioPlayingView extends StatelessWidget {
             color: Colors.white,
             size: 32,
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => _closePlayer(context),
         ),
       ),
       body: Stack(
