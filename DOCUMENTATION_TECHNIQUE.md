@@ -549,16 +549,19 @@ Fichier principal :
 notSpot/src/main/resources/application.properties
 ```
 
-Variables disponibles :
+Variables de base de données à configurer dans application.properties ou en variables d'environnement :
 
-- `SERVER_PORT` : port du serveur, `8080` par defaut ;
-- `SPRING_DATASOURCE_URL` : URL PostgreSQL ;
-- `SPRING_DATASOURCE_USERNAME` : utilisateur PostgreSQL ;
-- `SPRING_DATASOURCE_PASSWORD` : mot de passe PostgreSQL ;
-- `SPRING_JPA_HIBERNATE_DDL_AUTO` : mode Hibernate ;
-- `SONG_STORAGE_DIR` : dossier de stockage des fichiers audio ;
-- `SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE` : taille maximale d'un fichier ;
-- `SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE` : taille maximale d'une requete multipart.
+```properties
+# Configuration JDBC pour PostgreSQL
+spring.datasource.url=jdbc:postgresql://localhost:5432/notspot
+spring.datasource.username=notspot_user
+spring.datasource.password=your_secure_password
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# Stratégie de mise à jour du schéma (Mettre à 'validate' ou 'none' en production)
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+```
 
 ### 14.2 Mobile
 
@@ -591,7 +594,52 @@ git checkout master
 Suivre ensuite les instructions de ce repository pour configurer PostgreSQL et lancer l'API.
 
 ### 15.2 Backend de ce depot
+#### 15.2.1 Configuration locale de PostgreSQL (Exemple pour Fedora / Linux)
 
+Avant de lancer le backend, la base de données doit être créée et accessible.
+1. Installer et démarrer PostgreSQL (si non fait) :
+   
+```sh
+  sudo dnf install postgresql-server postgresql-contrib
+  sudo postgresql-setup --initdb
+  sudo systemctl enable --now postgresql
+```
+3. Se connecter au CLI PostgreSQL en tant qu'administrateur systeme :
+   
+```sh
+  sudo -i -u postgres psql
+```
+
+5. Initialiser la base de données et l'utilisateur pour l'application :
+  Exécutez les requêtes SQL suivantes dans le prompt postgres=# :
+```sql
+    -- Création de la base de données
+    CREATE DATABASE notspot;
+    
+    -- Création de l'utilisateur dédié au projet
+    CREATE USER notspot_user WITH PASSWORD 'your_secure_password';
+    
+    -- Attribution des privilèges sur la base
+    GRANT ALL PRIVILEGES ON DATABASE notspot TO notspot_user;
+    
+    -- (Spécifique à PostgreSQL 15+) Assurer les droits sur le schéma public
+    \c notspot
+    GRANT ALL ON SCHEMA public TO notspot_user;
+    
+    -- Quitter le CLI
+    \q
+```
+7. Vérification de la méthode d'authentification locale :
+  Si Spring Boot lève une erreur Ident authentication failed, éditez le fichier de configuration des accès de PostgreSQL (/var/lib/pgsql/data/pg_hba.conf) pour autoriser l'authentification par mot de          passe (md5 ou scram-sha-256) sur l'hôte local :
+
+```sh
+    # IPv4 local connections:
+    host    all             all             127.0.0.1/32            scram-sha-256
+```
+```sh
+  Après modification, redémarrez le service : sudo systemctl restart postgresql.
+```
+   
 Depuis la racine du backend :
 
 ```sh
