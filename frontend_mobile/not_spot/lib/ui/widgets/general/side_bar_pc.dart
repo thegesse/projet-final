@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../../../features/auth/state/auth_controller.dart';
 
 class SideBarPc extends StatelessWidget {
   final Widget child;
@@ -7,6 +9,8 @@ class SideBarPc extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authController = context.watch<AuthController>();
+    final bool isAdmin = authController.isAdmin;
     final String location = GoRouterState.of(context).matchedLocation;
     int selectedLocation = 0;
 
@@ -16,6 +20,7 @@ class SideBarPc extends StatelessWidget {
     if (location == '/song') selectedLocation = 3;
     if (location == '/addSong') selectedLocation = 4;
     if (location == '/settings') selectedLocation = 5;
+    if (location == '/admin') selectedLocation = 6;
 
     return Scaffold(
       body: Row(
@@ -52,6 +57,9 @@ class SideBarPc extends StatelessWidget {
                   break;
                 case 5:
                   context.go('/settings');
+                  break;
+                case 6:
+                  context.go('/admin');
               }
             },
             leading: const Padding(
@@ -71,37 +79,43 @@ class SideBarPc extends StatelessWidget {
                 ],
               ),
             ),
-            destinations: const [
-              NavigationRailDestination(
+            destinations: [
+              const NavigationRailDestination(
                 icon: Icon(Icons.home_outlined),
                 selectedIcon: Icon(Icons.home),
                 label: Text('Home'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.playlist_play_outlined),
                 selectedIcon: Icon(Icons.playlist_play),
                 label: Text('Playlists'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.radio_outlined),
                 selectedIcon: Icon(Icons.radio),
                 label: Text('Radio'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.music_note_outlined),
                 selectedIcon: Icon(Icons.music_note),
                 label: Text('Playing'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.add_box_outlined),
                 selectedIcon: Icon(Icons.add_box),
                 label: Text('Add'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.settings_outlined),
                 selectedIcon: Icon(Icons.settings),
                 label: Text('Settings'),
               ),
+              if(isAdmin)
+                const NavigationRailDestination(
+                  icon: Icon(Icons.admin_panel_settings_outlined),
+                  selectedIcon: Icon(Icons.admin_panel_settings),
+                  label: Text('Admin Panel'),
+                ),
             ],
           ),
           const VerticalDivider(thickness: 1, width: 1, color: Colors.black26),

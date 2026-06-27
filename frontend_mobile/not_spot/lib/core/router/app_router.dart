@@ -12,7 +12,7 @@ import '../../ui/screens/main screens/song_screen.dart';
 import '../../ui/screens/main screens/playlist_screen.dart';
 import '../../ui/screens/secondary screens/playlist_detail_screen.dart';
 import '../../ui/screens/main screens/radio_screen.dart';
-
+import '../../ui/screens/main screens/admin_song_screen.dart';
 //navbars
 import '../../ui/widgets/general/mobile_nav_bar.dart';
 import '../../ui/widgets/general/side_bar_pc.dart';
@@ -93,6 +93,17 @@ class AppRouter {
             path: '/playlists',
             builder: (context, state) => const PlaylistScreen(),
           ),
+          GoRoute(
+            path: '/admin',
+            builder: (context, state) => const AdminSongsPage(),
+            redirect: (context, state) {
+
+              if(!authController.isAuthenticated || !authController.isAdmin) {
+                return '/home';
+              }
+              return null;
+            },
+          )
         ],
       )
     ],

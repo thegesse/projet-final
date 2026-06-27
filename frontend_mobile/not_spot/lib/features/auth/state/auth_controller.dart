@@ -27,6 +27,7 @@ class AuthController extends ChangeNotifier {
   String? get username => _currentUser?.username;
   String? get email => _currentUser?.email;
 
+  bool get isAdmin => _currentUser?.role == 'ADMIN' || _currentUser?.role == 'SUPER_ADMIN';
   AuthController() {
     tryToLoadSavedUser();
   }
