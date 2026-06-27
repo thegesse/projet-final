@@ -123,7 +123,7 @@ cd back-end-not-spot
 git checkout master
 ```
 
-Suivre ensuite les instructions de ce repository pour configurer la base de donnees et lancer l'API.
+Suivre ensuite les instructions dans la documentation technique pour configurer la base de donnees et lancer l'API.
 
 ### Frontend Flutter
 
