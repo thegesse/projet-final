@@ -5,6 +5,9 @@ import com.goose.notspot.repository.SongRepository;
 import com.goose.notspot.service.songsService.songStorage.StoreSongService;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class StreamSongService {
@@ -16,10 +19,11 @@ public class StreamSongService {
         this.storeSongService = storeSongService;
     }
 
+    @Transactional(readOnly = true)
     public StreamResource streamSong(Long songId) {
         //nevermind forgot exceptions existed
         Song song = songRepository.findById(songId)
-                .orElseThrow(() -> new RuntimeException("song not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "song not found"));
 
         Resource resource = storeSongService.load(song.getAudioPath());
         return new StreamResource(resource, song.getContentType(), song.getFileSize());

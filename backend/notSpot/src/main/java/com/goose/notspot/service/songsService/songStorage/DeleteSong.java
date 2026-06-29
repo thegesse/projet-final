@@ -4,8 +4,8 @@ import com.goose.notspot.model.playlists.Playlist;
 import com.goose.notspot.model.songs.Song;
 import com.goose.notspot.repository.PlaylistRepository;
 import com.goose.notspot.repository.SongRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

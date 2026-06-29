@@ -4,7 +4,10 @@ import com.goose.notspot.model.playlists.DTO.ShortPlaylistVisuals;
 import com.goose.notspot.model.playlists.Playlist;
 import com.goose.notspot.model.requestDTO.playlist.RenamePlaylistRequest;
 import com.goose.notspot.repository.PlaylistRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ChangePlaylistNameService {
@@ -14,16 +17,17 @@ public class ChangePlaylistNameService {
         this.playlistRepository = playlistRepository;
     }
 
+    @Transactional
     public ShortPlaylistVisuals changePlaylistName(Long playlistId, String username, RenamePlaylistRequest request) {
         Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("playlist not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "playlist not found"));
 
         if(!playlist.getOwner().getUsername().equals(username)) {
-            throw new RuntimeException("playlist not owned");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "playlist not owned");
         }
 
         if(playlist.getTitle().equals("Liked Songs")) {
-            throw new IllegalStateException("Liked songs cannot be renamed");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Liked songs cannot be renamed");
         }
         playlist.setTitle(request.title());
 

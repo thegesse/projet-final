@@ -7,7 +7,10 @@ import com.goose.notspot.model.songs.DTO.SongDTO;
 import com.goose.notspot.model.songs.Song;
 import com.goose.notspot.repository.PlaylistRepository;
 import com.goose.notspot.repository.SongRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -34,18 +37,24 @@ public class AddSongToPlaylistService {
         return new PlaylistVisuals(playlist.getId(), playlist.getTitle(), songs);
     }
 
+    @Transactional
     public PlaylistVisuals addSong(Long playlistId, String username, AddSongRequest request) {
         Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("playlist not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "playlist not found"));
 
         if(!playlist.getOwner().getUsername().equals(username)) {
-            throw new RuntimeException("you dont own this playlist");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "you dont own this playlist");
         }
 
-        Song song = songRepository.findById(request.songId())
-                .orElseThrow(() -> new RuntimeException("song not found"));
+        Long songId = request.songId();
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "song not found"));
 
-        if(!playlist.getSongs().contains(song)) {
+        boolean alreadyInPlaylist = playlist.getSongs()
+                .stream()
+                .anyMatch(existing -> existing.getId() != null && existing.getId().equals(songId));
+
+        if(!alreadyInPlaylist) {
             playlist.getSongs().add(song);
         }
         Playlist savedPlaylist = playlistRepository.save(playlist);
